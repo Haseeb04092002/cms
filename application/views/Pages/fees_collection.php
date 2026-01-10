@@ -369,48 +369,90 @@
 </div>
 
 <script>
-    $(document).ready(function() {
+$(document).ready(function () {
 
-        $('.FindStudentForm').parsley();
+    $('#FindStudentForm').parsley();
 
-        $(document).off('submit', '.FindStudentForm');
-        $(document).on('submit', '.FindStudentForm', function(e) {
-            e.preventDefault();
+    $(document).on('submit', '#FindStudentForm', function (e) {
+        e.preventDefault();
 
-            let form = $(this);
+        let form = $(this);
+        if (!form.parsley().isValid()) return;
 
-            if (!form.parsley().isValid()) {
-                return;
-            }
+        $.ajax({
+            url: "<?= site_url('Cms/find_student') ?>",
+            type: "POST",
+            data: form.serialize(),
+            dataType: "json",
 
-            $.ajax({
-                url: "<?= site_url('Cms/find_student') ?>",
-                type: "POST",
-                data: form.serialize(),
-                dataType: "json",
-                cache: false,
-                success: function(response) {
+            beforeSend: function () {
+                $('#studentTableBody').html(
+                    '<tr><td colspan="9" class="text-center">Loading...</td></tr>'
+                );
+            },
 
-                    // close only current modal
-                    let modalEl = form.closest('.modal');
-                    let modal = bootstrap.Modal.getInstance(modalEl[0]);
-                    if (modal) modal.hide();
+            success: function (response) {
 
-                    Swal.fire({
-                        title: response.status ? 'Success' : 'Error',
-                        text: response.message,
-                        icon: response.status ? 'success' : 'error',
-                        timer: 3000,
-                        showConfirmButton: true
-                    });
-
-                    // if (response.status) {
-                    //     $("#pageContent").load("<?= base_url('Cms/fees_collection') ?>");
-                    // }
+                if (!response.status || response.data.length === 0) {
+                    $('#studentTableBody').html(
+                        '<tr><td colspan="9" class="text-center text-muted">No students found</td></tr>'
+                    );
+                    return;
                 }
-            });
-        });
 
+                let rows = '';
+
+                response.data.forEach(function (r) {
+
+                    let img = r.documentPath
+                        ? "<?= base_url() ?>" + r.documentPath
+                        : "<?= base_url('assets/images/default-avatar.png') ?>";
+
+                    let date = new Date(r.addedOn).toLocaleString();
+
+                    rows += `
+                        <tr>
+                            <td>${r.studentId}</td>
+
+                            <td>
+                                <img src="${img}"
+                                     class="img-thumbnail rounded-circle"
+                                     width="70">
+                            </td>
+
+                            <td>${r.admissionNo}</td>
+                            <td>${date}</td>
+                            <td>${r.student_education_type}</td>
+                            <td>${r.firstName} ${r.lastName}</td>
+                            <td>${r.className} ${r.sectionName}</td>
+
+                            <td>
+                                <span class="badge bg-warning text-dark">
+                                    ${r.status}
+                                </span>
+                            </td>
+
+                            <td>
+                                <button class="btn btn-sm btn-info">
+                                    Fee Management
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                $('#studentTableBody').html(rows);
+            },
+
+            error: function () {
+                $('#studentTableBody').html(
+                    '<tr><td colspan="9" class="text-danger text-center">Server Error</td></tr>'
+                );
+            }
+        });
     });
+
+});
 </script>
+
 

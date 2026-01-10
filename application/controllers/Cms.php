@@ -144,34 +144,20 @@ class Cms extends MY_Controller
 
 	public function find_student()
 	{
-		$UserId = '';
-		$UserName = '';
-		$UserEmail = '';
-		$UserRole = '';
-		$StationId = '';
-		$UserId = $this->session->userdata('user_id') ?? '';
-		$UserName = $this->session->userdata('user_name') ?? '';
-		$UserEmail = $this->session->userdata('user_email') ?? '';
-		$UserRole = $this->session->userdata('user_role') ?? '';
 		$StationId = $this->session->userdata('station_id') ?? '';
 
-		$Response['status']  = false;
-		$Response['message']  = "Some Error Occured. Try Again";
-
-		$education_type = $this->input->post('education_type')??'';
-		$class_section = $this->input->post('class_section')??'';
-		$student_name = $this->input->post('student_name')??'';
-
-		$data = array();
-
-		$data['education_type'] = $education_type;
-		$data['classId'] = $class_section;
-		$data['studentName'] = $student_name;
-		$data['stationId'] = $StationId;
+		$education_type = $this->input->post('education_type');
+		$class_section  = $this->input->post('class_section');
+		$student_name   = $this->input->post('student_name');
 
 		$this->db->select('
-			s.*,
+			s.studentId,
+			s.admissionNo,
+			s.addedOn,
 			s.education_type AS student_education_type,
+			s.firstName,
+			s.lastName,
+			s.status,
 
 			c.className,
 			c.sectionName,
@@ -180,43 +166,44 @@ class Cms extends MY_Controller
 		');
 
 		$this->db->from('tbl_students s');
+		$this->db->join('tbl_classes c', 'c.classId = s.classId', 'left');
 
-		/* Class */
-		$this->db->join(
-			'tbl_classes c',
-			'c.classId = s.classId',
-			'left'
-		);
-
-		/* Student profile image */
 		$this->db->join(
 			'tbl_documents d',
 			's.admissionNo = d.referenceId
-         AND d.referenceType = "student"
-         AND d.documentTitle = "profile_img"
-         AND d.isDeleted = 0
-         AND d.stationId = ' . $this->db->escape($StationId),
+			AND d.referenceType = "student"
+			AND d.documentTitle = "profile_img"
+			AND d.isDeleted = 0
+			AND d.stationId = ' . $this->db->escape($StationId),
 			'left'
 		);
 
-		$this->db->where($data);
+		if ($education_type) {
+			$this->db->where('s.education_type', $education_type);
+		}
 
+		if ($class_section) {
+			$this->db->where('s.classId', $class_section);
+		}
+
+		if ($student_name) {
+			$this->db->group_start();
+			$this->db->like('s.firstName', $student_name);
+			$this->db->or_like('s.lastName', $student_name);
+			$this->db->group_end();
+		}
+
+		$this->db->where('s.stationId', $StationId);
 		$this->db->order_by('s.addedOn', 'DESC');
 
-		$all_students = $this->db->get()->result();
-		$data['all_students'] = $all_students;
-		// print_r($this->db->last_query());
-		// die();
-		// if ($this->db->affected_rows() > 0) {
+		$students = $this->db->get()->result_array();
 
-		// 	$Response['status']  = true;
-		// 	$Response['message']  = "Found !";
-		// 	exit(json_encode($Response));
-		// 	return;
-		// }
-
-		$this->load->view('Pages/fees_collection', $data);
+		echo json_encode([
+			'status' => true,
+			'data'   => $students
+		]);
 	}
+
 
 	public function all_students()
 	{
