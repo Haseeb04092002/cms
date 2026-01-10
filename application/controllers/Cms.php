@@ -143,92 +143,80 @@ class Cms extends MY_Controller
 	}
 
 	public function find_student()
-    {
-        $UserId = '';
-        $UserName = '';
-        $UserEmail = '';
-        $UserRole = '';
-        $StationId = '';
-        $UserId = $this->session->userdata('user_id') ?? '';
-        $UserName = $this->session->userdata('user_name') ?? '';
-        $UserEmail = $this->session->userdata('user_email') ?? '';
-        $UserRole = $this->session->userdata('user_role') ?? '';
-        $StationId = $this->session->userdata('station_id') ?? '';
+	{
+		$UserId = '';
+		$UserName = '';
+		$UserEmail = '';
+		$UserRole = '';
+		$StationId = '';
+		$UserId = $this->session->userdata('user_id') ?? '';
+		$UserName = $this->session->userdata('user_name') ?? '';
+		$UserEmail = $this->session->userdata('user_email') ?? '';
+		$UserRole = $this->session->userdata('user_role') ?? '';
+		$StationId = $this->session->userdata('station_id') ?? '';
 
-        $query = $this->db->query("SHOW COLUMNS FROM tbl_students LIKE 'gender'");
-        $row = $query->row();
+		$Response['status']  = false;
+		$Response['message']  = "Some Error Occured. Try Again";
 
-        $all_genders = [];
+		$education_type = $this->input->post('education_type')??'';
+		$class_section = $this->input->post('class_section')??'';
+		$student_name = $this->input->post('student_name')??'';
 
-        if ($row) {
-            $enum = str_replace(["enum(", ")", "'"], "", $row->Type);
-            $all_genders = explode(",", $enum);
-        }
+		$data = array();
 
-        $query = $this->db->query("SHOW COLUMNS FROM tbl_students LIKE 'education_type'");
-        $row = $query->row();
+		$data['education_type'] = $education_type;
+		$data['classId'] = $class_section;
+		$data['studentName'] = $student_name;
+		$data['stationId'] = $StationId;
 
-        $all_education_type = [];
+		$this->db->select('
+			s.*,
+			s.education_type AS student_education_type,
 
-        if ($row) {
-            // Remove enum( and )
-            $enum = str_replace(["enum(", ")", "'"], "", $row->Type);
-            $all_education_type = explode(",", $enum);
-        }
+			c.className,
+			c.sectionName,
 
-        $this->db->select('
-            tbl_students.*,
-            tbl_parents.*,
-            tbl_classes.*
-        ');
-        $this->db->from('tbl_students');
-        $this->db->join('tbl_classes', 'tbl_students.classId = tbl_classes.classId');
-        $this->db->join('tbl_parents', 'tbl_students.admissionNo = tbl_parents.admissionNo');
-        $this->db->where('tbl_students.stationId', $StationId);
-        $this->db->where('tbl_students.admissionNo', $admissionNo);
-        $this->db->where('tbl_students.studentId', $studentId);
-        $this->db->where('tbl_students.isDeleted', 0);
-        $this->db->group_by('tbl_students.studentId');
+			d.documentPath
+		');
 
-        $student = $this->db->get()->row();
-        $siblings = $this->db
-            ->where([
-                'stationId' => $StationId,
-                'admissionNo' => $admissionNo,
-                'isDeleted' => 0
-            ])
-            ->get('tbl_siblings')
-            ->result();
-        $all_classes = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->order_by('addedOn', 'DESC')->get('tbl_classes')->result();
-        $img = $this->db
-            ->where([
-                'stationId' => $StationId,
-                'referenceType' => 'student',
-                'isDeleted' => 0,
-                'referenceId'   => $admissionNo,
-                'documentTitle' => 'profile_img'
-            ])
-            ->get('tbl_documents')
-            ->row();
+		$this->db->from('tbl_students s');
 
-        // print_r($this->db->last_query());
-        // die();
+		/* Class */
+		$this->db->join(
+			'tbl_classes c',
+			'c.classId = s.classId',
+			'left'
+		);
 
-        $this->load->view('Pages/admission', [
-            'student' => $student,
-            'all_education_type' => $all_education_type,
-            'all_classes' => $all_classes,
-            'student_img' => $img,
-            'siblings' => $siblings,
-            'all_genders' => $all_genders,
-            'case' => 'edit',
-        ]);
+		/* Student profile image */
+		$this->db->join(
+			'tbl_documents d',
+			's.admissionNo = d.referenceId
+         AND d.referenceType = "student"
+         AND d.documentTitle = "profile_img"
+         AND d.isDeleted = 0
+         AND d.stationId = ' . $this->db->escape($StationId),
+			'left'
+		);
 
-        // echo "<br>";
-        // echo "<pre>";
-        // print_r($student);
-        // die();
-    }
+		$this->db->where($data);
+
+		$this->db->order_by('s.addedOn', 'DESC');
+
+		$all_students = $this->db->get()->result();
+		$data['all_students'] = $all_students;
+		// print_r($this->db->last_query());
+		// die();
+		// if ($this->db->affected_rows() > 0) {
+
+		// 	$Response['status']  = true;
+		// 	$Response['message']  = "Found !";
+		// 	exit(json_encode($Response));
+		// 	return;
+		// }
+
+		$this->load->view('Pages/fees_collection', $data);
+	}
 
 	public function all_students()
 	{

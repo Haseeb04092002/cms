@@ -11,7 +11,7 @@
             <h5 class="mb-0">Search Student</h5>
         </div>
         <div class="card-body">
-            <form id="FindStudentForm">
+            <form id="FindStudentForm" data-parsley-validate>
                 <div class="row g-3">
 
                     <div class="col-md-4">
@@ -33,7 +33,7 @@
 
                     <div class="col-md-4">
                         <label class="form-label">Student Name</label>
-                        <input type="text" class="form-control" name="student_name">
+                        <input type="text" class="form-control" name="student_name" data-parsley-required-message="Student Name is required">
                     </div>
 
                     <div class="col-md-4">
@@ -52,7 +52,7 @@
                     </div>
 
                 </div>
-
+                
                 <button class="btn btn-primary mt-3" type="submit">Search</button>
 
             </form>
@@ -77,7 +77,7 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="studentTableBody">
                         <?php
                         // echo "<br>";
                         // echo "<pre>";
@@ -115,12 +115,6 @@
                                                 type="button" data-bs-toggle="modal" data-bs-target="#feeModal<?= $record->studentId ?>">
                                                 Fee Management
                                             </button>
-                                            <!-- <ul class="dropdown-menu">
-                                                <li><a class="dropdown-item navigator" href="<?= site_url('Student/student_profile/') . $record->studentId . '/' . $record->admissionNo ?>">View</a></li>
-                                                <li><a class="dropdown-item navigator" href="<?= site_url('Student/student_data/') . $record->studentId . '/' . $record->admissionNo ?>">Edit</a></li>
-                                                <li><a class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#feeModal<?= $record->studentId ?>">Fee</a></li>
-                                                <li><a class="dropdown-item" href="#">Promote</a></li>
-                                            </ul> -->
                                         </div>
 
                                         <!-- Fee Modal -->
@@ -373,3 +367,50 @@
     </div>
 
 </div>
+
+<script>
+    $(document).ready(function() {
+
+        $('.FindStudentForm').parsley();
+
+        $(document).off('submit', '.FindStudentForm');
+        $(document).on('submit', '.FindStudentForm', function(e) {
+            e.preventDefault();
+
+            let form = $(this);
+
+            if (!form.parsley().isValid()) {
+                return;
+            }
+
+            $.ajax({
+                url: "<?= site_url('Cms/find_student') ?>",
+                type: "POST",
+                data: form.serialize(),
+                dataType: "json",
+                cache: false,
+                success: function(response) {
+
+                    // close only current modal
+                    let modalEl = form.closest('.modal');
+                    let modal = bootstrap.Modal.getInstance(modalEl[0]);
+                    if (modal) modal.hide();
+
+                    Swal.fire({
+                        title: response.status ? 'Success' : 'Error',
+                        text: response.message,
+                        icon: response.status ? 'success' : 'error',
+                        timer: 3000,
+                        showConfirmButton: true
+                    });
+
+                    // if (response.status) {
+                    //     $("#pageContent").load("<?= base_url('Cms/fees_collection') ?>");
+                    // }
+                }
+            });
+        });
+
+    });
+</script>
+
