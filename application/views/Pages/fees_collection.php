@@ -110,10 +110,10 @@
                                     <div class="d-flex gap-2">
 
                                         <!-- Controls Dropdown -->
-                                        <div class="dropdown position-static">
-                                            <button class="btn btn-sm btn-info dropdown-toggle"
+                                        <div class="position-static">
+                                            <button class="btn btn-sm btn-info"
                                                 type="button" data-bs-toggle="modal" data-bs-target="#feeModal<?= $record->studentId ?>">
-                                                Fee
+                                                Fee Management
                                             </button>
                                             <!-- <ul class="dropdown-menu">
                                                 <li><a class="dropdown-item navigator" href="<?= site_url('Student/student_profile/') . $record->studentId . '/' . $record->admissionNo ?>">View</a></li>
