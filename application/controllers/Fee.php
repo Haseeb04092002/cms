@@ -1,0 +1,268 @@
+<?php
+defined('BASEPATH') or exit('No direct script access allowed');
+
+class Fee extends MY_Controller
+{
+    public function add_fee_structure()
+    {
+        $UserId = '';
+        $UserName = '';
+        $UserEmail = '';
+        $UserRole = '';
+        $StationId = '';
+        $UserId = $this->session->userdata('user_id') ?? '';
+        $UserName = $this->session->userdata('user_name') ?? '';
+        $UserEmail = $this->session->userdata('user_email') ?? '';
+        $UserRole = $this->session->userdata('user_role') ?? '';
+        $StationId = $this->session->userdata('station_id') ?? '';
+
+        $Response['status']  = false;
+        $Response['message']  = "Some Error Occured. Try Again";
+
+        $this->form_validation->set_rules('education_type', 'Education Type', 'required');
+        $this->form_validation->set_rules('class_section', 'Class', 'required');
+        $this->form_validation->set_rules('fee_type', 'Fee Type', 'required');
+        $this->form_validation->set_rules('amount', 'Amount', 'required');
+        $this->form_validation->set_rules('effectiveDate', 'Effective Date', 'required');
+
+        if ($this->form_validation->run() == FALSE) {
+            $Response['message']  = validation_errors();
+            exit(json_encode($Response));
+            return;
+        } else {
+
+            $education_type = $this->input->post('education_type');
+            $class_section = $this->input->post('class_section');
+            $fee_type = $this->input->post('fee_type');
+            $amount = $this->input->post('amount');
+            $effectiveDate = $this->input->post('effectiveDate');
+
+            $data = array();
+
+            $data['education_type'] = $education_type;
+            $data['classId'] = $class_section;
+            $data['feeType'] = $fee_type;
+            $data['amount'] = $amount;
+            $data['effectiveFrom'] = $effectiveDate;
+
+            $IsDuplicate = $this->db->where($data)->get('tbl_fee_structure')->row();
+            if ($IsDuplicate) {
+                $Response['message']  = 'Duplicate Record';
+                exit(json_encode($Response));
+                // return;
+            }
+
+            $data['addedOn'] = date('Y-m-d H:i:s');
+            $data['addedBy'] = $UserId;
+            $data['stationId'] = $StationId;
+            $data['userId'] = $UserId;
+
+            $this->db->insert('tbl_fee_structure', $data);
+            // print_r($this->db->last_query());
+            // die();
+            if ($this->db->affected_rows() > 0) {
+
+                // $notifi_data = array();
+                // $notifi_data['StationId'] = $StationId;
+                // $notifi_data['Title'] = 'Data Added';
+                // $notifi_data['Message'] = 'Product Added by ' . $StationName;
+                // $notifi_data['Type'] = 'In App';
+                // $notifi_data['AddedOn'] = date('Y-m-d H:i:s');
+                // $notifi_data['AddedBy'] = $UserId;
+                // $this->db->insert('tbl_notifications', $notifi_data);
+
+                $Response['status']  = true;
+                $Response['message']  = "Fee Structure Saved Successfully";
+                exit(json_encode($Response));
+                return;
+            }
+        }
+        exit(json_encode($Response));
+    }
+
+
+    public function delete_fee_structure()
+    {
+        $UserId = '';
+        $UserName = '';
+        $UserEmail = '';
+        $UserRole = '';
+        $StationId = '';
+        $UserId = $this->session->userdata('user_id') ?? '';
+        $UserName = $this->session->userdata('user_name') ?? '';
+        $UserEmail = $this->session->userdata('user_email') ?? '';
+        $UserRole = $this->session->userdata('user_role') ?? '';
+        $StationId = $this->session->userdata('station_id') ?? '';
+
+        $Response['status']  = false;
+        $Response['message']  = "Some Error Occured. Try Again";
+
+        $feeStructureId = $this->input->post('feeStructureId');
+
+        $data['feeStructureId'] = $feeStructureId;
+        $data['stationId'] = $StationId;
+
+        $check = $this->db->where($data)->update('tbl_fee_structure', ['isDeleted' => 1]);
+        // print_r($this->db->last_query());
+        // die();
+        // if ($this->db->affected_rows() > 0) {
+        if ($check) {
+            // $notifi_data = array();
+            // $notifi_data['StationId'] = $StationId;
+            // $notifi_data['Title'] = 'Data Deleted';
+            // $notifi_data['Message'] = 'Product Deleted by ' . $StationName;
+            // $notifi_data['Type'] = 'In App';
+            // $notifi_data['AddedOn'] = date('Y-m-d H:i:s');
+            // $notifi_data['AddedBy'] = $UserId;
+            // $this->db->insert('tbl_notifications', $notifi_data);
+
+            $Response['status']  = true;
+            $Response['message']  = "Deleted Successfully";
+        }
+        exit(json_encode($Response));
+    }
+
+
+    public function collect_fee()
+    {
+        $UserId = '';
+        $UserName = '';
+        $UserEmail = '';
+        $UserRole = '';
+        $StationId = '';
+        $UserId = $this->session->userdata('user_id') ?? '';
+        $UserName = $this->session->userdata('user_name') ?? '';
+        $UserEmail = $this->session->userdata('user_email') ?? '';
+        $UserRole = $this->session->userdata('user_role') ?? '';
+        $StationId = $this->session->userdata('station_id') ?? '';
+
+        $Response['status']  = false;
+        $Response['message']  = "Some Error Occured. Try Again";
+
+        $this->form_validation->set_rules('payAmount', 'Pay Amount', 'required');
+        $this->form_validation->set_rules('paymentMode', 'Payment Mode', 'required');
+
+        if ($this->form_validation->run() == FALSE) {
+            $Response['message']  = validation_errors();
+            exit(json_encode($Response));
+            return;
+        } else {
+
+            $studentId = $this->input->post('studentId') ?? null;
+            $feeId = $this->input->post('feeId') ?? null;
+            $feeType = $this->input->post('feeType') ?? null;
+            $classId = $this->input->post('classId') ?? null;
+            $education_type = $this->input->post('education_type') ?? null;
+            $discount_type = $this->input->post('discount_type') ?? null;
+            $discount_value = $this->input->post('discount_value') ?? null;
+            $payAmount = $this->input->post('payAmount') ?? null;
+            $paymentMode = $this->input->post('paymentMode') ?? null;
+
+            $data = array();
+
+            $data['studentId'] = $studentId;
+            $data['classId'] = $classId;
+            $data['feeType'] = $feeType;
+            $data['education_type'] = $education_type;
+            $data['discountType'] = $discount_type;
+            $data['discountAmount'] = $discount_value;
+            $data['paidAmount'] = $payAmount;
+            $data['paymentMode'] = $paymentMode;
+            $data['paymentStatus'] = 1;
+            $data['addedOn'] = date('Y-m-d H:i:s');
+            $data['addedBy'] = $UserId;
+            $data['stationId'] = $StationId;
+            $data['userId'] = $UserId;
+
+            $this->db->insert('tbl_fees', $data);
+            // print_r($this->db->last_query());
+            // die();
+            if ($this->db->affected_rows() > 0) {
+
+                // $notifi_data = array();
+                // $notifi_data['StationId'] = $StationId;
+                // $notifi_data['Title'] = 'Data Added';
+                // $notifi_data['Message'] = 'Product Added by ' . $StationName;
+                // $notifi_data['Type'] = 'In App';
+                // $notifi_data['AddedOn'] = date('Y-m-d H:i:s');
+                // $notifi_data['AddedBy'] = $UserId;
+                // $this->db->insert('tbl_notifications', $notifi_data);
+
+                $Response['status']  = true;
+                $Response['message']  = "Fee Saved Successfully";
+                exit(json_encode($Response));
+                return;
+            }
+        }
+        exit(json_encode($Response));
+    }
+
+    public function all_student_fee_data()
+    {
+        $UserId = '';
+        $UserName = '';
+        $UserEmail = '';
+        $UserRole = '';
+        $StationId = '';
+        $UserId = $this->session->userdata('user_id') ?? '';
+        $UserName = $this->session->userdata('user_name') ?? '';
+        $UserEmail = $this->session->userdata('user_email') ?? '';
+        $UserRole = $this->session->userdata('user_role') ?? '';
+        $StationId = $this->session->userdata('station_id') ?? '';
+
+        $education_type = $this->input->post('education_type');
+        $studentId = $this->input->post('studentId');
+        $classId = $this->input->post('classId');
+
+        $this->db->select('
+            tbl_students.*,
+            tbl_fees.*
+        ');
+        $this->db->from('tbl_students');
+        $this->db->join('tbl_fees', 'tbl_students.studentId = tbl_fees.studentId');
+        $this->db->where('tbl_students.stationId', $StationId);
+        $this->db->where('tbl_students.studentId', $studentId);
+        $this->db->where('tbl_students.education_type', $education_type);
+        $this->db->where('tbl_students.isDeleted', 0);
+        $this->db->group_by('tbl_students.studentId');
+
+        $student = $this->db->get()->row();
+        $siblings = $this->db
+            ->where([
+                'stationId' => $StationId,
+                'admissionNo' => $admissionNo,
+                'isDeleted' => 0
+            ])
+            ->get('tbl_siblings')
+            ->result();
+        $all_classes = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->order_by('addedOn', 'DESC')->get('tbl_classes')->result();
+        $img = $this->db
+            ->where([
+                'stationId' => $StationId,
+                'referenceType' => 'student',
+                'isDeleted' => 0,
+                'referenceId'   => $admissionNo,
+                'documentTitle' => 'profile_img'
+            ])
+            ->get('tbl_documents')
+            ->row();
+
+        // print_r($this->db->last_query());
+        // die();
+
+        $this->load->view('Pages/admission', [
+            'student' => $student,
+            'all_education_type' => $all_education_type,
+            'all_classes' => $all_classes,
+            'student_img' => $img,
+            'siblings' => $siblings,
+            'all_genders' => $all_genders,
+            'case' => 'edit',
+        ]);
+
+        // echo "<br>";
+        // echo "<pre>";
+        // print_r($student);
+        // die();
+    }
+}
