@@ -372,6 +372,48 @@
 <script>
 $(document).ready(function () {
 
+    $('.FormCollectFee').parsley();
+
+    // remove previous handlers before binding
+    $(document).off('submit', '.FormCollectFee');
+    // submit handler
+    $(document).on('submit', '.FormCollectFee', function(e) {
+        e.preventDefault();
+
+        let form = $(this);
+
+        if (!form.parsley().isValid()) {
+            return;
+        }
+
+        $.ajax({
+            url: "<?= site_url('Fee/collect_fee') ?>",
+            type: "POST",
+            data: form.serialize(),
+            dataType: "json",
+            cache: false,
+            success: function(response) {
+
+                // close only current modal
+                let modalEl = form.closest('.modal');
+                let modal = bootstrap.Modal.getInstance(modalEl[0]);
+                if (modal) modal.hide();
+
+                Swal.fire({
+                    title: response.status ? 'Success' : 'Error',
+                    text: response.message,
+                    icon: response.status ? 'success' : 'error',
+                    timer: 3000,
+                    showConfirmButton: true
+                });
+
+                if (response.status) {
+                    $("#pageContent").load("<?= base_url('Cms/fee_collection') ?>");
+                }
+            }
+        });
+    });
+
     $('#FindStudentForm').parsley();
 
     $(document).on('click', '#resetBtn', function () {
