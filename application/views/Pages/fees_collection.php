@@ -54,6 +54,7 @@
                 </div>
                 
                 <button class="btn btn-primary mt-3" type="submit">Search</button>
+                <button class="btn btn-primary mt-3 ms-3" type="reset" id="resetBtn">Reset</button>
 
             </form>
         </div>
@@ -372,6 +373,10 @@
 $(document).ready(function () {
 
     $('#FindStudentForm').parsley();
+
+    $(document).on('click', '#resetBtn', function () {
+        $("#pageContent").load("<?= base_url('Cms/fee_collection') ?>");
+    });
 
     $(document).on('submit', '#FindStudentForm', function (e) {
         e.preventDefault();
