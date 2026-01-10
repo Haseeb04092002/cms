@@ -142,6 +142,94 @@ class Cms extends MY_Controller
 		$this->load->view('Pages/student_attendance');
 	}
 
+	public function find_student()
+    {
+        $UserId = '';
+        $UserName = '';
+        $UserEmail = '';
+        $UserRole = '';
+        $StationId = '';
+        $UserId = $this->session->userdata('user_id') ?? '';
+        $UserName = $this->session->userdata('user_name') ?? '';
+        $UserEmail = $this->session->userdata('user_email') ?? '';
+        $UserRole = $this->session->userdata('user_role') ?? '';
+        $StationId = $this->session->userdata('station_id') ?? '';
+
+        $query = $this->db->query("SHOW COLUMNS FROM tbl_students LIKE 'gender'");
+        $row = $query->row();
+
+        $all_genders = [];
+
+        if ($row) {
+            $enum = str_replace(["enum(", ")", "'"], "", $row->Type);
+            $all_genders = explode(",", $enum);
+        }
+
+        $query = $this->db->query("SHOW COLUMNS FROM tbl_students LIKE 'education_type'");
+        $row = $query->row();
+
+        $all_education_type = [];
+
+        if ($row) {
+            // Remove enum( and )
+            $enum = str_replace(["enum(", ")", "'"], "", $row->Type);
+            $all_education_type = explode(",", $enum);
+        }
+
+        $this->db->select('
+            tbl_students.*,
+            tbl_parents.*,
+            tbl_classes.*
+        ');
+        $this->db->from('tbl_students');
+        $this->db->join('tbl_classes', 'tbl_students.classId = tbl_classes.classId');
+        $this->db->join('tbl_parents', 'tbl_students.admissionNo = tbl_parents.admissionNo');
+        $this->db->where('tbl_students.stationId', $StationId);
+        $this->db->where('tbl_students.admissionNo', $admissionNo);
+        $this->db->where('tbl_students.studentId', $studentId);
+        $this->db->where('tbl_students.isDeleted', 0);
+        $this->db->group_by('tbl_students.studentId');
+
+        $student = $this->db->get()->row();
+        $siblings = $this->db
+            ->where([
+                'stationId' => $StationId,
+                'admissionNo' => $admissionNo,
+                'isDeleted' => 0
+            ])
+            ->get('tbl_siblings')
+            ->result();
+        $all_classes = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->order_by('addedOn', 'DESC')->get('tbl_classes')->result();
+        $img = $this->db
+            ->where([
+                'stationId' => $StationId,
+                'referenceType' => 'student',
+                'isDeleted' => 0,
+                'referenceId'   => $admissionNo,
+                'documentTitle' => 'profile_img'
+            ])
+            ->get('tbl_documents')
+            ->row();
+
+        // print_r($this->db->last_query());
+        // die();
+
+        $this->load->view('Pages/admission', [
+            'student' => $student,
+            'all_education_type' => $all_education_type,
+            'all_classes' => $all_classes,
+            'student_img' => $img,
+            'siblings' => $siblings,
+            'all_genders' => $all_genders,
+            'case' => 'edit',
+        ]);
+
+        // echo "<br>";
+        // echo "<pre>";
+        // print_r($student);
+        // die();
+    }
+
 	public function all_students()
 	{
 		$UserId    = $this->session->userdata('user_id') ?? '';
@@ -318,8 +406,77 @@ class Cms extends MY_Controller
 		$this->load->view('Pages/fees_structure', $data);
 	}
 
+
+
 	public function fees_collection()
 	{
-		$this->load->view('Pages/fees_collection');
+		$UserId = '';
+		$UserName = '';
+		$UserEmail = '';
+		$UserRole = '';
+		$StationId = '';
+		$UserId = $this->session->userdata('user_id') ?? '';
+		$UserName = $this->session->userdata('user_name') ?? '';
+		$UserEmail = $this->session->userdata('user_email') ?? '';
+		$UserRole = $this->session->userdata('user_role') ?? '';
+		$StationId = $this->session->userdata('station_id') ?? '';
+
+		$all_classes = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->order_by('addedOn', 'DESC')->get('tbl_classes')->result();
+
+		$query = $this->db->query("SHOW COLUMNS FROM tbl_students LIKE 'education_type'");
+		$row = $query->row();
+
+		$all_education_type = [];
+
+		if ($row) {
+			// Remove enum( and )
+			$enum = str_replace(["enum(", ")", "'"], "", $row->Type);
+			$all_education_type = explode(",", $enum);
+		}
+
+		$this->db->select('
+			s.*,
+			s.education_type AS student_education_type,
+
+			c.className,
+			c.sectionName,
+
+			d.documentPath
+		');
+
+		$this->db->from('tbl_students s');
+
+		/* Class */
+		$this->db->join(
+			'tbl_classes c',
+			'c.classId = s.classId',
+			'left'
+		);
+
+		/* Student profile image */
+		$this->db->join(
+			'tbl_documents d',
+			's.admissionNo = d.referenceId
+         AND d.referenceType = "student"
+         AND d.documentTitle = "profile_img"
+         AND d.isDeleted = 0
+         AND d.stationId = ' . $this->db->escape($StationId),
+			'left'
+		);
+
+		$this->db->where('s.stationId', $StationId);
+		$this->db->where('s.isDeleted', 0);
+
+		$this->db->order_by('s.addedOn', 'DESC');
+
+		$all_students = $this->db->get()->result();
+
+		$data = array();
+
+		$data['all_students'] = $all_students;
+		$data['all_classes'] = $all_classes;
+		$data['all_education_type'] = $all_education_type;
+
+		$this->load->view('Pages/fees_collection', $data);
 	}
 }
