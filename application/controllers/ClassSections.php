@@ -109,7 +109,7 @@ class ClassSections extends MY_Controller
         exit(json_encode($Response));
     }
 
-    public function edit_product()
+    public function edit_class()
     {
         $UserId = '';
         $UserName = '';

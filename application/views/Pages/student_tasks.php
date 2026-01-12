@@ -16,17 +16,58 @@ $StationId = $this->session->userdata('station_id') ?? '';
         <h4 class="fw-bold">Assign Tasks to Students</h4>
     </div>
 
-    <div class="card mb-3">
+    <!-- Search Student Card -->
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Search Student</h5>
+        </div>
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-3">
-                    <label class="form-label">Search</label>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <form id="FindStudentForm" data-parsley-validate>
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label class="form-label">Education Type</label>
+                        <select class="form-select" name="education_type" required data-parsley-required-message="Education Type is required">
+                            <option value="">-- Select --</option>
+
+                            <?php if (!empty($all_education_type)): ?>
+                                <?php foreach ($all_education_type as $type): ?>
+                                    <option value="<?= $type ?>"
+                                        <?= (!empty($student->education_type) && $student->education_type == $type) ? 'selected' : '' ?>>
+                                        <?= $type ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+
+                        </select>
                     </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Student Name</label>
+                        <input type="text" class="form-control" name="student_name" data-parsley-required-message="Student Name is required">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Class</label>
+                        <select class="form-select" name="class_section" required data-parsley-required-message="Class & Section is required">
+                            <option value="">--Select--</option>
+                            <?php if (!empty($all_classes)): ?>
+                                <?php foreach ($all_classes as $type): ?>
+                                    <option value="<?= $type->classId ?>"
+                                        <?= (!empty($student->classId) && $student->classId == $type->classId) ? 'selected' : '' ?>>
+                                        <?= $type->className ?> <?= $type->sectionName ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+
                 </div>
-            </div>
+                
+                <button class="btn btn-primary mt-3" type="submit">Search</button>
+                <button class="btn btn-primary mt-3 ms-3" type="reset" id="resetBtn">Reset</button>
+
+            </form>
         </div>
     </div>
 
