@@ -1,8 +1,32 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class ClassSections extends MY_Controller
+class Classes extends MY_Controller
 {
+    
+	public function all_classes()
+	{
+		$UserId = '';
+		$UserName = '';
+		$UserEmail = '';
+		$UserRole = '';
+		$StationId = '';
+		$UserId = $this->session->userdata('user_id') ?? '';
+		$UserName = $this->session->userdata('user_name') ?? '';
+		$UserEmail = $this->session->userdata('user_email') ?? '';
+		$UserRole = $this->session->userdata('user_role') ?? '';
+		$StationId = $this->session->userdata('station_id') ?? '';
+
+		$all_classes = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->order_by('addedOn', 'DESC')->get('tbl_classes')->result();
+		$data['all_classes'] = $all_classes;
+		$this->load->view('pages/class/all_classes', $data);
+	}
+
+	public function all_sections()
+	{
+		$this->load->view('pages/class/all_sections');
+	}
+    
     public function add_class()
     {
         $UserId = '';

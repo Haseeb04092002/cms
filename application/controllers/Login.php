@@ -5,9 +5,6 @@ class Login extends CI_Controller
 {
     public function index()
     {
-        // $all_warehouses = $this->db->where("IsDeleted", null)->get('tbl_warehouse')->result();
-        // print_r($all_warehouses);
-        // die();
         $this->load->view('login');
     }
 

@@ -250,7 +250,7 @@ class Fee extends MY_Controller
         // print_r($this->db->last_query());
         // die();
 
-        $this->load->view('Pages/admission', [
+        $this->load->view('pages/student/admission', [
             'student' => $student,
             'all_education_type' => $all_education_type,
             'all_classes' => $all_classes,
@@ -265,4 +265,137 @@ class Fee extends MY_Controller
         // print_r($student);
         // die();
     }
+
+    public function fees()
+	{
+		$this->load->view('pages/finance/fees');
+	}
+
+    public function fees_structure()
+	{
+		$UserId = '';
+		$UserName = '';
+		$UserEmail = '';
+		$UserRole = '';
+		$StationId = '';
+		$UserId = $this->session->userdata('user_id') ?? '';
+		$UserName = $this->session->userdata('user_name') ?? '';
+		$UserEmail = $this->session->userdata('user_email') ?? '';
+		$UserRole = $this->session->userdata('user_role') ?? '';
+		$StationId = $this->session->userdata('station_id') ?? '';
+
+		$query = $this->db->query("SHOW COLUMNS FROM tbl_students LIKE 'education_type'");
+		$row = $query->row();
+
+		$all_education_type = [];
+
+		if ($row) {
+			// Remove enum( and )
+			$enum = str_replace(["enum(", ")", "'"], "", $row->Type);
+			$all_education_type = explode(",", $enum);
+		}
+
+		$query = $this->db->query("SHOW COLUMNS FROM tbl_fee_structure LIKE 'feeType'");
+		$row = $query->row();
+
+		$feeType = [];
+
+		if ($row) {
+			// Remove enum( and )
+			$enum = str_replace(["enum(", ")", "'"], "", $row->Type);
+			$feeType = explode(",", $enum);
+		}
+
+		$all_classes = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->order_by('addedOn', 'DESC')->get('tbl_classes')->result();
+		$all_fee_structures = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->order_by('addedOn', 'DESC')->get('tbl_fee_structure')->result();
+
+		// $this->db->select('*');
+		// $this->db->from('tbl_students');
+		// $this->db->join('tbl_classes', 'tbl_students.classId = tbl_classes.classId');
+		// $this->db->where('tbl_students.stationId', $StationId);
+		// $this->db->where('tbl_students.isDeleted', 0);
+		// $this->db->order_by('tbl_students.addedOn', 'DESC');
+		// $all_students = $this->db->get()->result();
+
+		$data = array();
+		$data['all_classes'] = $all_classes;
+		$data['all_education_type'] = $all_education_type;
+		$data['feeType'] = $feeType;
+		$data['all_fee_structures'] = $all_fee_structures;
+		$this->load->view('pages/finance/fees_structure', $data);
+	}
+
+
+
+	public function fees_collection()
+	{
+		$UserId = '';
+		$UserName = '';
+		$UserEmail = '';
+		$UserRole = '';
+		$StationId = '';
+		$UserId = $this->session->userdata('user_id') ?? '';
+		$UserName = $this->session->userdata('user_name') ?? '';
+		$UserEmail = $this->session->userdata('user_email') ?? '';
+		$UserRole = $this->session->userdata('user_role') ?? '';
+		$StationId = $this->session->userdata('station_id') ?? '';
+
+		$all_classes = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->order_by('addedOn', 'DESC')->get('tbl_classes')->result();
+
+		$query = $this->db->query("SHOW COLUMNS FROM tbl_students LIKE 'education_type'");
+		$row = $query->row();
+
+		$all_education_type = [];
+
+		if ($row) {
+			// Remove enum( and )
+			$enum = str_replace(["enum(", ")", "'"], "", $row->Type);
+			$all_education_type = explode(",", $enum);
+		}
+
+		$this->db->select('
+			s.*,
+			s.education_type AS student_education_type,
+
+			c.className,
+			c.sectionName,
+
+			d.documentPath
+		');
+
+		$this->db->from('tbl_students s');
+
+		/* Class */
+		$this->db->join(
+			'tbl_classes c',
+			'c.classId = s.classId',
+			'left'
+		);
+
+		/* Student profile image */
+		$this->db->join(
+			'tbl_documents d',
+			's.admissionNo = d.referenceId
+         AND d.referenceType = "student"
+         AND d.documentTitle = "profile_img"
+         AND d.isDeleted = 0
+         AND d.stationId = ' . $this->db->escape($StationId),
+			'left'
+		);
+
+		$this->db->where('s.stationId', $StationId);
+		$this->db->where('s.isDeleted', 0);
+
+		$this->db->order_by('s.addedOn', 'DESC');
+
+		$all_students = $this->db->get()->result();
+
+		$data = array();
+
+		$data['all_students'] = $all_students;
+		$data['all_classes'] = $all_classes;
+		$data['all_education_type'] = $all_education_type;
+
+		$this->load->view('pages/finance/fees_collection', $data);
+	}
 }

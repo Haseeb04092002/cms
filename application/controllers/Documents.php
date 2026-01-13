@@ -105,8 +105,6 @@ class Cms extends MY_Controller
         return $image_upload;
     }
 
-
-
     function VideoUpload($Reference = 'Properties', $ReferenceId = 0): bool
     {
         $Reference      = ($Reference) ? $Reference : $this->input->post('txtReferenceType');

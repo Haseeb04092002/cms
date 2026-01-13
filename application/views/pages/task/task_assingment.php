@@ -4,7 +4,7 @@
     <div class="row g-4">
 
         <div class="col-md-6">
-            <a href="<?= site_url('Cms/staff_tasks') ?>" class="navigator text-decoration-none">
+            <a href="<?= site_url('Tasks/staff_tasks') ?>" class="navigator text-decoration-none">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <h5 class="card-title fw-bold">
@@ -16,7 +16,7 @@
         </div>
 
         <div class="col-md-6">
-            <a href="<?= site_url('Cms/student_tasks') ?>" class="navigator text-decoration-none">
+            <a href="<?= site_url('Tasks/student_tasks') ?>" class="navigator text-decoration-none">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <h5 class="card-title fw-bold">

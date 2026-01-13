@@ -5,7 +5,7 @@
 
         <!-- Fee Structure -->
         <div class="col-md-6">
-            <a href="<?= site_url('Cms/fees_structure') ?>" class="navigator text-decoration-none">
+            <a href="<?= site_url('Fee/fees_structure') ?>" class="navigator text-decoration-none">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <h5 class="card-title fw-bold">
@@ -21,7 +21,7 @@
 
         <!-- Fee Collection -->
         <div class="col-md-6">
-            <a href="<?= site_url('Cms/fees_collection') ?>" class="navigator text-decoration-none">
+            <a href="<?= site_url('Fee/fees_collection') ?>" class="navigator text-decoration-none">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <h5 class="card-title fw-bold">

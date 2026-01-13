@@ -6,6 +6,60 @@ use Dompdf\Options;
 
 class Student extends MY_Controller
 {
+    public function admission()
+	{
+		$UserId = '';
+		$UserName = '';
+		$UserEmail = '';
+		$UserRole = '';
+		$StationId = '';
+		$UserId = $this->session->userdata('user_id') ?? '';
+		$UserName = $this->session->userdata('user_name') ?? '';
+		$UserEmail = $this->session->userdata('user_email') ?? '';
+		$UserRole = $this->session->userdata('user_role') ?? '';
+		$StationId = $this->session->userdata('station_id') ?? '';
+		// Create a new DateTime object for the current time
+		$date = new DateTime();
+		// Format the date using the format() method
+		$date = $date->format('His');
+
+		$query = $this->db->query("SHOW COLUMNS FROM tbl_students LIKE 'gender'");
+		$row = $query->row();
+
+		$all_genders = [];
+
+		if ($row) {
+			$enum = str_replace(["enum(", ")", "'"], "", $row->Type);
+			$all_genders = explode(",", $enum);
+		}
+
+		$query = $this->db->query("SHOW COLUMNS FROM tbl_students LIKE 'education_type'");
+		$row = $query->row();
+
+		$all_education_type = [];
+
+		if ($row) {
+			// Remove enum( and )
+			$enum = str_replace(["enum(", ")", "'"], "", $row->Type);
+			$all_education_type = explode(",", $enum);
+		}
+		// echo '<pre>';
+		// print_r($row);
+		// exit;
+		$all_classes = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->order_by('addedOn', 'DESC')->get('tbl_classes')->result();
+		$this->load->view('pages/student/admission', [
+			'all_genders' => $all_genders,
+			'all_classes' => $all_classes,
+			'all_education_type' => $all_education_type,
+			'admissionNo' => $date
+		]);
+	}
+
+    public function student_attendance()
+	{
+		$this->load->view('pages/student/student_attendance');
+	}
+
     public function save_admission($case = 'add')
     {
         $UserId = '';
@@ -352,7 +406,7 @@ class Student extends MY_Controller
         // print_r($this->db->last_query());
         // die();
 
-        $this->load->view('Pages/admission', [
+        $this->load->view('pages/student/admission', [
             'student' => $student,
             'all_education_type' => $all_education_type,
             'all_classes' => $all_classes,
@@ -403,7 +457,7 @@ class Student extends MY_Controller
         // print_r($this->db->last_query());
         // die();
         
-        $this->load->view('Pages/student_profile', [
+        $this->load->view('pages/student/student_profile', [
             'student' => $student,
             'all_classes' => $all_classes,
             'siblings' => $siblings
@@ -579,4 +633,116 @@ class Student extends MY_Controller
         // Stream PDF (open in browser)
         $dompdf->stream("character_certificate.pdf", ["Attachment" => 0]);
     }
+
+    public function find_student()
+	{
+		$StationId = $this->session->userdata('station_id') ?? '';
+
+		$education_type = $this->input->post('education_type');
+		$class_section  = $this->input->post('class_section');
+		$student_name   = $this->input->post('student_name');
+
+		$this->db->select('
+			s.studentId,
+			s.admissionNo,
+			s.addedOn,
+			s.education_type AS student_education_type,
+			s.firstName,
+			s.lastName,
+			s.status,
+
+			c.className,
+			c.sectionName,
+
+			d.documentPath
+		');
+
+		$this->db->from('tbl_students s');
+		$this->db->join('tbl_classes c', 'c.classId = s.classId', 'left');
+
+		$this->db->join(
+			'tbl_documents d',
+			's.admissionNo = d.referenceId
+			AND d.referenceType = "student"
+			AND d.documentTitle = "profile_img"
+			AND d.isDeleted = 0
+			AND d.stationId = ' . $this->db->escape($StationId),
+			'left'
+		);
+
+		if ($education_type) {
+			$this->db->where('s.education_type', $education_type);
+		}
+
+		if ($class_section) {
+			$this->db->where('s.classId', $class_section);
+		}
+
+		if ($student_name) {
+			$this->db->group_start();
+			$this->db->like('s.firstName', $student_name);
+			$this->db->or_like('s.lastName', $student_name);
+			$this->db->group_end();
+		}
+
+		$this->db->where('s.stationId', $StationId);
+		$this->db->order_by('s.addedOn', 'DESC');
+
+		$students = $this->db->get()->result_array();
+
+		echo json_encode([
+			'status' => true,
+			'data'   => $students
+		]);
+	}
+
+
+	public function all_students()
+	{
+		$UserId    = $this->session->userdata('user_id') ?? '';
+		$UserName  = $this->session->userdata('user_name') ?? '';
+		$UserEmail = $this->session->userdata('user_email') ?? '';
+		$UserRole  = $this->session->userdata('user_role') ?? '';
+		$StationId = $this->session->userdata('station_id') ?? '';
+
+		$this->db->select('
+			s.*,
+			s.education_type AS student_education_type,
+
+			c.className,
+			c.sectionName,
+
+			d.documentPath
+		');
+
+		$this->db->from('tbl_students s');
+
+		/* Class */
+		$this->db->join(
+			'tbl_classes c',
+			'c.classId = s.classId',
+			'left'
+		);
+
+		/* Student profile image */
+		$this->db->join(
+			'tbl_documents d',
+			's.admissionNo = d.referenceId
+         AND d.referenceType = "student"
+         AND d.documentTitle = "profile_img"
+         AND d.isDeleted = 0
+         AND d.stationId = ' . $this->db->escape($StationId),
+			'left'
+		);
+
+		$this->db->where('s.stationId', $StationId);
+		$this->db->where('s.isDeleted', 0);
+
+		$this->db->order_by('s.addedOn', 'DESC');
+
+		$all_students = $this->db->get()->result();
+		$data['all_students'] = $all_students;
+
+		$this->load->view('pages/student/all_students', $data);
+	}
 }

@@ -35,33 +35,6 @@
     <div class="card mb-3">
         <div class="card-body">
             <div class="row">
-                <!-- <div class="col-md-3">
-                    <label class="form-label">Select Class</label>
-                    <select class="form-select">
-                        <option selected>--</option>
-                        <option value="1">Grade 1</option>
-                        <option value="2">Grade 2</option>
-                        <option value="3">Grade 3</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Select Section</label>
-                    <select class="form-select">
-                        <option selected>--</option>
-                        <option value="1">A</option>
-                        <option value="2">B</option>
-                        <option value="3">C</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Select Student</label>
-                    <select class="form-select">
-                        <option selected>--</option>
-                        <option value="1">Ali</option>
-                        <option value="2">Haseeb</option>
-                        <option value="3">Qasim</option>
-                    </select>
-                </div> -->
                 <div class="col-md-3">
                     <label class="form-label">Search</label>
                     <div class="input-group mb-3">

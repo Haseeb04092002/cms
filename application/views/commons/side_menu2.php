@@ -10,35 +10,35 @@
             </li>
 
             <li class="item">
-                <a href="<?= site_url('Cms/admission') ?>" class="nav_link navigator">
+                <a href="<?= site_url('Student/admission') ?>" class="nav_link navigator">
                     <span class="navlink_icon"><i class="bx bx-user-plus"></i></span>
                     <span class="navlink">Admission</span>
                 </a>
             </li>
 
             <li class="item">
-                <a href="<?= site_url('Cms/all_students') ?>" class="nav_link navigator">
+                <a href="<?= site_url('Student/all_students') ?>" class="nav_link navigator">
                     <span class="navlink_icon"><i class="bx bx-user"></i></span>
                     <span class="navlink">Students</span>
                 </a>
             </li>
 
             <li class="item">
-                <a href="<?= site_url('Cms/all_classes') ?>" class="nav_link navigator">
+                <a href="<?= site_url('Classes/all_classes') ?>" class="nav_link navigator">
                     <span class="navlink_icon"><i class="bx bx-building-house"></i></span>
                     <span class="navlink">Class & Section</span>
                 </a>
             </li>
 
             <li class="item">
-                <a href="<?= site_url('Cms/fees') ?>" class="nav_link navigator">
+                <a href="<?= site_url('Fee/fees') ?>" class="nav_link navigator">
                     <span class="navlink_icon"><i class="bx bx-money"></i></span>
                     <span class="navlink">Fee Management</span>
                 </a>
             </li>
 
             <li class="item">
-                <a href="<?= site_url('Cms/task_assingment') ?>" class="nav_link navigator">
+                <a href="<?= site_url('Tasks/task_assingment') ?>" class="nav_link navigator">
                     <span class="navlink_icon"><i class="bx bx-money"></i></span>
                     <span class="navlink">Task Assignment</span>
                 </a>
