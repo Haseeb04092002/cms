@@ -18,46 +18,110 @@ defined('BASEPATH') or exit('No direct script access allowed');
     $this->load->view('commons/js_links');
     ?>
 
+    <style>
+        /* Background */
+        .login-wrapper {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #4f46e5, #3b82f6);
+            padding: 20px;
+        }
+
+        /* Card */
+        .login-card {
+            max-width: 420px;
+            width: 100%;
+            border: none;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        /* Logo */
+        .login-logo {
+            width: 90px;
+            height: auto;
+        }
+
+        /* Inputs */
+        .login-input .input-group-text {
+            background: #f8f9fa;
+            border-right: 0;
+            color: #6c757d;
+        }
+
+        .login-input .form-control {
+            border-left: 0;
+            padding: 12px;
+        }
+
+        .login-input .form-control:focus {
+            box-shadow: none;
+            border-color: #3b82f6;
+        }
+
+        /* Button */
+        .login-btn {
+            padding: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+
     <!-- Main Content -->
-    <main class="flex-grow-1 d-flex justify-content-center align-items-center">
-        <div class="card shadow-lg rounded-4 overflow-hidden" style="max-width: 600px; width: 100%;">
-            <div class="row g-0">
-                <div class="col-md-12 p-4">
-                    <h3 class="mb-4 text-center fw-bold">Login</h3>
-                    <form id="LoginForm" class="d-flex flex-column gap-3">
+    <main class="login-wrapper d-flex justify-content-center align-items-center">
+        <div class="card login-card shadow-lg rounded-4 overflow-hidden">
+            <div class="card-body p-4">
 
-                        <!-- <div class="input-group">
-                            <select name="WarehouseId" id="WarehouseId" class="selectpicker form-control" data-live-search="true" title="Select shop">
-                                <?php foreach ($all_warehouses as $record):
-                                ?>
-                                    <option value="<?= $record->WarehouseId ?>"><?= $record->Name ?> (<?= $record->Location ?>)</option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div> -->
-
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0">
-                                <i class="bi bi-envelope text-secondary"></i>
-                            </span>
-                            <input type="text" class="form-control border-start-0" placeholder="Username" name="email" required>
-                        </div>
-
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0">
-                                <i class="bi bi-lock text-secondary"></i>
-                            </span>
-                            <input type="password" class="form-control border-start-0" placeholder="Password" name="password" required>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
-                            Submit
-                        </button>
-
-                    </form>
+                <!-- Logo -->
+                <div class="text-center mb-4">
+                    <img src="<?= base_url('assets/img/logo.png') ?>" alt="Company Logo" class="login-logo">
+                    <h3 class="mt-3 fw-bold">Welcome Back</h3>
+                    <p class="text-muted small">Please login to your account</p>
                 </div>
+
+                <form id="LoginForm" class="d-flex flex-column gap-3">
+
+                    <div class="input-group login-input">
+                        <span class="input-group-text">
+                            <i class="bi bi-envelope"></i>
+                        </span>
+                        <input type="text" class="form-control" placeholder="Username" name="email" required>
+                    </div>
+
+                    <div class="input-group login-input">
+                        <span class="input-group-text">
+                            <i class="bi bi-lock"></i>
+                        </span>
+                        <input type="password" class="form-control" placeholder="Password" name="password" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary login-btn">
+                        Login
+                    </button>
+
+                </form>
             </div>
         </div>
     </main>
+
 
     <!-- Footer -->
     <footer class="mt-auto text-center bg-light">

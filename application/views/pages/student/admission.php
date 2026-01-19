@@ -168,47 +168,43 @@
                                         <?php endif; ?>
 
 
-                                        <div id="childrenWrapper">
-
-                                            <div class="row g-2 mb-2 child-row">
-                                                <div class="col-md-4">
-                                                    <input type="text" name="child_name[]" class="form-control" placeholder="name">
-                                                </div>
-
-                                                <div class="col-md-2">
-                                                    <input type="number" name="child_age[]" class="form-control" placeholder="age">
-                                                </div>
-
-                                                <div class="col-md-4">
-                                                    <select class="form-select" name="child_class[]">
-                                                        <option value="">--Select class--</option>
-                                                        <?php foreach ($all_classes as $class): ?>
-                                                            <option value="<?= $class->classId ?>">
-                                                                <?= $class->className ?> (<?= $class->sectionName ?>)
-                                                            </option>
-                                                        <?php endforeach; ?>
-                                                    </select>
-                                                </div>
-
-                                                <!-- ONLY FIRST ROW HAS + -->
-                                                <div class="col-md-1">
-                                                    <button type="button" class="btn btn-primary btn-sm add-row">+</button>
-                                                </div>
-
-                                                <div class="col-md-1">
-                                                    <!-- no delete on first row -->
-                                                </div>
+                                        <div class="row g-2 mb-2 child-row">
+                                            <div class="col-md-4">
+                                                <input type="text" name="child_name[]" class="form-control" placeholder="name">
                                             </div>
 
+                                            <div class="col-md-2">
+                                                <input type="number" name="child_age[]" class="form-control" placeholder="age">
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <select class="form-select" name="child_class[]">
+                                                    <option value="">--Select class--</option>
+                                                    <?php foreach ($all_classes as $class): ?>
+                                                        <option value="<?= $class->classId ?>">
+                                                            <?= $class->className ?> (<?= $class->sectionName ?>)
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+
+                                            <!-- ONLY FIRST ROW HAS + -->
+                                            <div class="col-md-1">
+                                                <button type="button" class="btn btn-primary btn-sm add-row">+</button>
+                                            </div>
+
+                                            <div class="col-md-1">
+                                                <!-- no delete on first row -->
+                                            </div>
                                         </div>
 
-
-
                                     </div>
+
 
                                 </div>
 
                             </div>
+
                         </div>
 
                         <!-- PARENT INFO -->
@@ -293,11 +289,14 @@
                         </div>
 
                     </form>
-
                 </div>
+
+
+
             </div>
         </div>
     </div>
+</div>
 
 
 </div>
@@ -345,7 +344,7 @@
         });
 
 
-        $(document).on('submit', '#AdmissionForm', function(e) {
+        $(document).off('submit', '#AdmissionForm').on('submit', '#AdmissionForm', function(e) {
             e.preventDefault();
 
             let form = $(this);
@@ -379,7 +378,7 @@
                             title: 'Success',
                             text: response.message
                         }).then(() => {
-                            var url = "<?= base_url('Cms/all_students') ?>";
+                            var url = "<?= base_url('Student/all_students') ?>";
                             // console.log(url);
                             document.querySelectorAll('.modal').forEach(modalEl => {
                                 const modalInstance = bootstrap.Modal.getInstance(modalEl) ||

@@ -7,58 +7,58 @@ use Dompdf\Options;
 class Student extends MY_Controller
 {
     public function admission()
-	{
-		$UserId = '';
-		$UserName = '';
-		$UserEmail = '';
-		$UserRole = '';
-		$StationId = '';
-		$UserId = $this->session->userdata('user_id') ?? '';
-		$UserName = $this->session->userdata('user_name') ?? '';
-		$UserEmail = $this->session->userdata('user_email') ?? '';
-		$UserRole = $this->session->userdata('user_role') ?? '';
-		$StationId = $this->session->userdata('station_id') ?? '';
-		// Create a new DateTime object for the current time
-		$date = new DateTime();
-		// Format the date using the format() method
-		$date = $date->format('His');
+    {
+        $UserId = '';
+        $UserName = '';
+        $UserEmail = '';
+        $UserRole = '';
+        $StationId = '';
+        $UserId = $this->session->userdata('user_id') ?? '';
+        $UserName = $this->session->userdata('user_name') ?? '';
+        $UserEmail = $this->session->userdata('user_email') ?? '';
+        $UserRole = $this->session->userdata('user_role') ?? '';
+        $StationId = $this->session->userdata('station_id') ?? '';
+        // Create a new DateTime object for the current time
+        $date = new DateTime();
+        // Format the date using the format() method
+        $date = $date->format('His');
 
-		$query = $this->db->query("SHOW COLUMNS FROM tbl_students LIKE 'gender'");
-		$row = $query->row();
+        $query = $this->db->query("SHOW COLUMNS FROM tbl_students LIKE 'gender'");
+        $row = $query->row();
 
-		$all_genders = [];
+        $all_genders = [];
 
-		if ($row) {
-			$enum = str_replace(["enum(", ")", "'"], "", $row->Type);
-			$all_genders = explode(",", $enum);
-		}
+        if ($row) {
+            $enum = str_replace(["enum(", ")", "'"], "", $row->Type);
+            $all_genders = explode(",", $enum);
+        }
 
-		$query = $this->db->query("SHOW COLUMNS FROM tbl_students LIKE 'education_type'");
-		$row = $query->row();
+        $query = $this->db->query("SHOW COLUMNS FROM tbl_students LIKE 'education_type'");
+        $row = $query->row();
 
-		$all_education_type = [];
+        $all_education_type = [];
 
-		if ($row) {
-			// Remove enum( and )
-			$enum = str_replace(["enum(", ")", "'"], "", $row->Type);
-			$all_education_type = explode(",", $enum);
-		}
-		// echo '<pre>';
-		// print_r($row);
-		// exit;
-		$all_classes = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->order_by('addedOn', 'DESC')->get('tbl_classes')->result();
-		$this->load->view('pages/student/admission', [
-			'all_genders' => $all_genders,
-			'all_classes' => $all_classes,
-			'all_education_type' => $all_education_type,
-			'admissionNo' => $date
-		]);
-	}
+        if ($row) {
+            // Remove enum( and )
+            $enum = str_replace(["enum(", ")", "'"], "", $row->Type);
+            $all_education_type = explode(",", $enum);
+        }
+        // echo '<pre>';
+        // print_r($row);
+        // exit;
+        $all_classes = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->order_by('addedOn', 'DESC')->get('tbl_classes')->result();
+        $this->load->view('pages/student/admission', [
+            'all_genders' => $all_genders,
+            'all_classes' => $all_classes,
+            'all_education_type' => $all_education_type,
+            'admissionNo' => $date
+        ]);
+    }
 
     public function student_attendance()
-	{
-		$this->load->view('pages/student/student_attendance');
-	}
+    {
+        $this->load->view('pages/student/student_attendance');
+    }
 
     public function save_admission($case = 'add')
     {
@@ -225,17 +225,23 @@ class Student extends MY_Controller
                             'image'
                         );
                     }
-                    $IsDuplicate = $this->db
-                        ->where('firstName', $student_first_name)
-                        ->where('lastName', $student_last_name)
-                        ->where('dateOfBirth', $dob)
-                        ->where('gender', $gender)
-                        ->where('stationId', $StationId)
-                        ->get('tbl_students')->row();
+                    $student_first_name = trim($student_first_name);
+                    $student_last_name  = trim($student_last_name);
+                    $gender             = trim($gender);
+                    $dob                = date('Y-m-d', strtotime($dob));
+
+                    $this->db->where('firstName', $student_first_name);
+                    $this->db->where('lastName', $student_last_name);
+                    $this->db->where('dateOfBirth', $dob);
+                    $this->db->where('gender', $gender);
+                    $this->db->where('stationId', $StationId);
+
+                    $IsDuplicate = $this->db->get('tbl_students')->row();
+
                     if ($IsDuplicate) {
-                        $Response['message']  = 'Duplicate Record';
-                        exit(json_encode($Response));
-                        // return;
+                        $Response['message'] = 'Duplicate Record';
+                        echo json_encode($Response);
+                        exit;
                     }
 
                     if (!empty($child_names)) {
@@ -253,7 +259,7 @@ class Student extends MY_Controller
                                 ];
                                 $this->db->insert('tbl_siblings', $childData);
                                 if ($this->db->affected_rows() > 0) {
-                                    $Response['status']  = true;
+                                    $check_sibling = true;
                                 }
                             }
                         }
@@ -261,14 +267,19 @@ class Student extends MY_Controller
 
                     $this->db->insert('tbl_students', $data_students);
                     if ($this->db->affected_rows() > 0) {
-                        $Response['status']  = true;
+                        $check_students = true;
                     }
 
                     $data_parents['admissionNo'] = $admission_no;
 
                     $this->db->insert('tbl_parents', $data_parents);
                     if ($this->db->affected_rows() > 0) {
+                        $check_parents = true;
+                    }
+
+                    if ($check_parents == true && $check_sibling == true && $check_students == true) {
                         $Response['status']  = true;
+                        $Response['message']  = "Student Added Successfully";
                     }
 
                     break;
@@ -333,6 +344,132 @@ class Student extends MY_Controller
         }
         exit(json_encode($Response));
     }
+
+    public function save_password($studentId = '')
+    {
+        $StationId = $this->session->userdata('station_id') ?? '';
+
+        $Response['status']  = false;
+        $Response['message'] = "Some Error Occured. Try Again";
+
+        $old_password     = $this->input->post('old_password') ?? '';
+        $new_password     = $this->input->post('new_password') ?? '';
+        $confirm_password = $this->input->post('confirm_password') ?? '';
+        $case             = $this->input->post('case') ?? '';
+
+        /* ===============================
+       COMMON PASSWORD REGEX
+       =============================== */
+        $password_regex = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d])\S{6,8}$/';
+
+        switch ($case) {
+
+            /* ===============================
+           ADD PASSWORD
+           =============================== */
+            case 'add':
+
+                $this->form_validation->set_rules(
+                    'new_password',
+                    'New Password',
+                    'required|min_length[6]|max_length[8]'
+                );
+                $this->form_validation->set_rules(
+                    'confirm_password',
+                    'Confirm New Password',
+                    'required'
+                );
+
+                if ($this->form_validation->run() == FALSE) {
+                    $Response['message'] = validation_errors();
+                    exit(json_encode($Response));
+                }
+
+                if ($new_password !== $confirm_password) {
+                    $Response['message'] = "Password do not match";
+                    exit(json_encode($Response));
+                }
+
+                if (!preg_match($password_regex, $new_password)) {
+                    $Response['message'] =
+                        "Password must be 6–8 characters, include uppercase, lowercase, number, special character, and no spaces.";
+                    exit(json_encode($Response));
+                }
+
+                break;
+
+            /* ===============================
+           EDIT PASSWORD
+           =============================== */
+            case 'edit':
+
+                $this->form_validation->set_rules(
+                    'old_password',
+                    'Current Password',
+                    'required'
+                );
+                $this->form_validation->set_rules(
+                    'new_password',
+                    'New Password',
+                    'required|min_length[6]|max_length[8]'
+                );
+                $this->form_validation->set_rules(
+                    'confirm_password',
+                    'Confirm New Password',
+                    'required'
+                );
+
+                if ($this->form_validation->run() == FALSE) {
+                    $Response['message'] = validation_errors();
+                    exit(json_encode($Response));
+                }
+
+                if ($new_password !== $confirm_password) {
+                    $Response['message'] = "Password do not match";
+                    exit(json_encode($Response));
+                }
+
+                if (!preg_match($password_regex, $new_password)) {
+                    $Response['message'] =
+                        "Password must be 6–8 characters, include uppercase, lowercase, number, special character, and no spaces.";
+                    exit(json_encode($Response));
+                }
+
+                $check = $this->db
+                    ->where('stationId', $StationId)
+                    ->where('studentId', $studentId)
+                    ->where("BINARY `password` = " . $this->db->escape($old_password), null, false)
+                    ->where('isDeleted', 0)
+                    ->get('tbl_students')
+                    ->row();
+
+                if (!$check) {
+                    $Response['message'] = "Current Password is incorrect";
+                    exit(json_encode($Response));
+                }
+
+                break;
+        }
+
+        /* ===============================
+       SAVE PASSWORD
+       =============================== */
+        $data['password'] = $new_password;
+
+        $this->db
+            ->where('stationId', $StationId)
+            ->where('studentId', $studentId)
+            ->where('isDeleted', 0)
+            ->update('tbl_students', $data);
+
+        if ($this->db->affected_rows() > 0) {
+            $Response['status']  = true;
+            $Response['message'] = "Password Saved Successfully";
+        }
+
+        exit(json_encode($Response));
+    }
+
 
     public function student_data($studentId = '', $admissionNo = '')
     {
@@ -452,11 +589,11 @@ class Student extends MY_Controller
             ->get('tbl_siblings')
             ->result();
         $all_classes = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->order_by('addedOn', 'DESC')->get('tbl_classes')->result();
-        
+
         // echo "<br>";
         // print_r($this->db->last_query());
         // die();
-        
+
         $this->load->view('pages/student/student_profile', [
             'student' => $student,
             'all_classes' => $all_classes,
@@ -635,14 +772,14 @@ class Student extends MY_Controller
     }
 
     public function find_student()
-	{
-		$StationId = $this->session->userdata('station_id') ?? '';
+    {
+        $StationId = $this->session->userdata('station_id') ?? '';
 
-		$education_type = $this->input->post('education_type');
-		$class_section  = $this->input->post('class_section');
-		$student_name   = $this->input->post('student_name');
+        $education_type = $this->input->post('education_type');
+        $class_section  = $this->input->post('class_section');
+        $student_name   = $this->input->post('student_name');
 
-		$this->db->select('
+        $this->db->select('
 			s.studentId,
 			s.admissionNo,
 			s.addedOn,
@@ -657,55 +794,55 @@ class Student extends MY_Controller
 			d.documentPath
 		');
 
-		$this->db->from('tbl_students s');
-		$this->db->join('tbl_classes c', 'c.classId = s.classId', 'left');
+        $this->db->from('tbl_students s');
+        $this->db->join('tbl_classes c', 'c.classId = s.classId', 'left');
 
-		$this->db->join(
-			'tbl_documents d',
-			's.admissionNo = d.referenceId
+        $this->db->join(
+            'tbl_documents d',
+            's.admissionNo = d.referenceId
 			AND d.referenceType = "student"
 			AND d.documentTitle = "profile_img"
 			AND d.isDeleted = 0
 			AND d.stationId = ' . $this->db->escape($StationId),
-			'left'
-		);
+            'left'
+        );
 
-		if ($education_type) {
-			$this->db->where('s.education_type', $education_type);
-		}
+        if ($education_type) {
+            $this->db->where('s.education_type', $education_type);
+        }
 
-		if ($class_section) {
-			$this->db->where('s.classId', $class_section);
-		}
+        if ($class_section) {
+            $this->db->where('s.classId', $class_section);
+        }
 
-		if ($student_name) {
-			$this->db->group_start();
-			$this->db->like('s.firstName', $student_name);
-			$this->db->or_like('s.lastName', $student_name);
-			$this->db->group_end();
-		}
+        if ($student_name) {
+            $this->db->group_start();
+            $this->db->like('s.firstName', $student_name);
+            $this->db->or_like('s.lastName', $student_name);
+            $this->db->group_end();
+        }
 
-		$this->db->where('s.stationId', $StationId);
-		$this->db->order_by('s.addedOn', 'DESC');
+        $this->db->where('s.stationId', $StationId);
+        $this->db->order_by('s.addedOn', 'DESC');
 
-		$students = $this->db->get()->result_array();
+        $students = $this->db->get()->result_array();
 
-		echo json_encode([
-			'status' => true,
-			'data'   => $students
-		]);
-	}
+        echo json_encode([
+            'status' => true,
+            'data'   => $students
+        ]);
+    }
 
 
-	public function all_students()
-	{
-		$UserId    = $this->session->userdata('user_id') ?? '';
-		$UserName  = $this->session->userdata('user_name') ?? '';
-		$UserEmail = $this->session->userdata('user_email') ?? '';
-		$UserRole  = $this->session->userdata('user_role') ?? '';
-		$StationId = $this->session->userdata('station_id') ?? '';
+    public function all_students()
+    {
+        $UserId    = $this->session->userdata('user_id') ?? '';
+        $UserName  = $this->session->userdata('user_name') ?? '';
+        $UserEmail = $this->session->userdata('user_email') ?? '';
+        $UserRole  = $this->session->userdata('user_role') ?? '';
+        $StationId = $this->session->userdata('station_id') ?? '';
 
-		$this->db->select('
+        $this->db->select('
 			s.*,
 			s.education_type AS student_education_type,
 
@@ -715,34 +852,34 @@ class Student extends MY_Controller
 			d.documentPath
 		');
 
-		$this->db->from('tbl_students s');
+        $this->db->from('tbl_students s');
 
-		/* Class */
-		$this->db->join(
-			'tbl_classes c',
-			'c.classId = s.classId',
-			'left'
-		);
+        /* Class */
+        $this->db->join(
+            'tbl_classes c',
+            'c.classId = s.classId',
+            'left'
+        );
 
-		/* Student profile image */
-		$this->db->join(
-			'tbl_documents d',
-			's.admissionNo = d.referenceId
+        /* Student profile image */
+        $this->db->join(
+            'tbl_documents d',
+            's.admissionNo = d.referenceId
          AND d.referenceType = "student"
          AND d.documentTitle = "profile_img"
          AND d.isDeleted = 0
          AND d.stationId = ' . $this->db->escape($StationId),
-			'left'
-		);
+            'left'
+        );
 
-		$this->db->where('s.stationId', $StationId);
-		$this->db->where('s.isDeleted', 0);
+        $this->db->where('s.stationId', $StationId);
+        $this->db->where('s.isDeleted', 0);
 
-		$this->db->order_by('s.addedOn', 'DESC');
+        $this->db->order_by('s.addedOn', 'DESC');
 
-		$all_students = $this->db->get()->result();
-		$data['all_students'] = $all_students;
+        $all_students = $this->db->get()->result();
+        $data['all_students'] = $all_students;
 
-		$this->load->view('pages/student/all_students', $data);
-	}
+        $this->load->view('pages/student/all_students', $data);
+    }
 }

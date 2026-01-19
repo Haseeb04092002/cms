@@ -30,5 +30,10 @@ class Cms extends MY_Controller
 		$this->load->view('pages/finance/all_expenses');
 	}
 
+	public function user_access_control()
+	{
+		$this->load->view('pages/admin/users_access_control');
+	}
+
 	
 }

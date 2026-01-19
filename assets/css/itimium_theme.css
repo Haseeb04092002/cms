@@ -1,0 +1,94 @@
+:Itimium-theme {
+    --it-dark: #06113C;
+    --it-primary: #FF8C32;
+    --it-secondary: #F5E7C6;
+    --it-light: #EEEEEE;
+    --it-gray: #DDDDDD;
+}
+
+/* =====================================================
+   iTimium – Bootstrap 5 ERP Theme Override
+   Load AFTER bootstrap.min.css
+   ===================================================== */
+
+:root {
+
+    /* ===== Brand Core ===== */
+    --bs-primary: #FF8C32;
+    --bs-secondary: #F5E7C6;
+    --bs-dark: #06113C;
+    --bs-light: #F9FAFB;
+    --bs-gray: #DDDDDD;
+
+    /* ===== Text Colors ===== */
+    --bs-body-color: #06113C;
+    --bs-body-bg: #FFFFFF;
+    --bs-heading-color: #06113C;
+    --bs-secondary-color: #4B5563;
+
+    /* ===== Links ===== */
+    --bs-link-color: #FF8C32;
+    --bs-link-hover-color: #e6761f;
+
+    /* ===== Borders ===== */
+    --bs-border-color: #E5E7EB;
+    --bs-border-color-translucent: rgba(6, 17, 60, 0.08);
+
+    /* ===== Cards ===== */
+    --bs-card-bg: #FFFFFF;
+    --bs-card-border-color: #E5E7EB;
+    --bs-card-cap-bg: #F9FAFB;
+    --bs-card-color: #06113C;
+
+    /* ===== Buttons ===== */
+    --bs-btn-color: #06113C;
+    --bs-btn-bg: #FF8C32;
+    --bs-btn-border-color: #FF8C32;
+    --bs-btn-hover-bg: #e6761f;
+    --bs-btn-hover-border-color: #e6761f;
+    --bs-btn-active-bg: #d96814;
+    --bs-btn-active-border-color: #d96814;
+
+    /* ===== Forms ===== */
+    --bs-input-bg: #FFFFFF;
+    --bs-input-color: #06113C;
+    --bs-input-border-color: #D1D5DB;
+    --bs-input-focus-border-color: #FF8C32;
+    --bs-input-focus-box-shadow: 0 0 0 0.15rem rgba(255, 140, 50, 0.2);
+
+    /* ===== Tables ===== */
+    --bs-table-bg: #FFFFFF;
+    --bs-table-striped-bg: #F9FAFB;
+    --bs-table-hover-bg: #FFF4E9;
+    --bs-table-border-color: #E5E7EB;
+    --bs-table-color: #06113C;
+
+    /* ===== Dropdowns ===== */
+    --bs-dropdown-bg: #FFFFFF;
+    --bs-dropdown-border-color: #E5E7EB;
+    --bs-dropdown-link-color: #06113C;
+    --bs-dropdown-link-hover-bg: #FFF4E9;
+    --bs-dropdown-link-hover-color: #06113C;
+
+    /* ===== Alerts ===== */
+    --bs-success: #198754;
+    --bs-info: #0dcaf0;
+    --bs-warning: #FF8C32;
+    --bs-danger: #dc3545;
+
+    /* ===== Nav & Tabs ===== */
+    --bs-nav-link-color: #06113C;
+    --bs-nav-link-hover-color: #FF8C32;
+    --bs-nav-tabs-link-active-color: #06113C;
+    --bs-nav-tabs-link-active-bg: #FFFFFF;
+    --bs-nav-tabs-border-color: #E5E7EB;
+
+    /* ===== Modals ===== */
+    --bs-modal-bg: #FFFFFF;
+    --bs-modal-border-color: #E5E7EB;
+
+    /* ===== Shadows (Soft ERP look) ===== */
+    --bs-box-shadow-sm: 0 1px 2px rgba(6, 17, 60, 0.05);
+    --bs-box-shadow: 0 4px 12px rgba(6, 17, 60, 0.08);
+    --bs-box-shadow-lg: 0 10px 25px rgba(6, 17, 60, 0.12);
+}

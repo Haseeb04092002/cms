@@ -42,7 +42,163 @@ class Document_upload extends CI_Model
         return $Response;
     }
 
-    public function ImageUpload($file, $Reference = '', $ReferenceId = 0): bool
+
+    public function task_doc_upload($file = '', $Reference = '', $ReferenceId = 0, $upload_type = 'both')
+    {
+        $Response['status']  = false;
+        $Response['message']  = "Some Error Occured. Try Again";
+
+        $image_upload = false;
+
+        $image_upload = $this->task_upload($file, $Reference, $ReferenceId, 'task_doc', 'all_files');
+        if ($image_upload) {
+            $Response['Status'] = true;
+            $Response['Message'] = 'Files uploaded successfully';
+        }
+
+        // exit(json_encode($Response));
+        return $Response;
+    }
+
+
+
+    public function ImageUpload($file, $Reference = '', $ReferenceId = 0, $newFileName = 'profile_img', $lastFolder = 'images'): bool
+    {
+        $StationId = $this->session->userdata('station_id') ?? '';
+        $UserId    = $this->session->userdata('user_id') ?? '';
+
+        $uploadDir = FCPATH . "uploads/$Reference/$ReferenceId/$lastFolder/";
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        // 🔹 Get file extension
+        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $fileName = $newFileName . strtolower($ext);
+        $fullPath = $uploadDir . $fileName;
+
+        // 🔴 Delete old file (if exists)
+        if (file_exists($fullPath)) {
+            unlink($fullPath);
+        }
+
+        // 🔴 Delete old DB record
+        $this->db->where([
+            'referenceId'   => $ReferenceId,
+            'referenceType' => $Reference,
+            'documentTitle' => $newFileName
+        ])->delete('tbl_documents');
+
+        $this->load->library('upload');
+
+        $_FILES['file'] = [
+            'name'     => $fileName,
+            'type'     => $file['type'],
+            'tmp_name' => $file['tmp_name'],
+            'error'    => $file['error'],
+            'size'     => $file['size']
+        ];
+
+        $config = [
+            'upload_path'   => $uploadDir,
+            'allowed_types' => '*',
+            'max_size'      => 9999999999999,
+            'overwrite'     => true,
+            'file_name'     => $fileName
+        ];
+
+        $this->upload->initialize($config);
+
+        if (!$this->upload->do_upload('file')) {
+            log_message('error', $this->upload->display_errors());
+            return false;
+        }
+
+        // 🔹 Save DB record
+        $this->db->insert('tbl_documents', [
+            'stationId'     => $StationId,
+            'userId'        => $UserId,
+            'referenceId'   => $ReferenceId,
+            'referenceType' => $Reference,
+            'documentTitle' => $newFileName,
+            'documentPath'  => "uploads/$Reference/$ReferenceId/$lastFolder/$fileName",
+            'addedOn'       => date('Y-m-d H:i:s'),
+            'addedBy'       => $UserId
+        ]);
+
+        return true;
+    }
+
+
+    public function task_upload($file, $Reference = '', $ReferenceId = 0, $newFileName = '', $lastFolder = ''): bool
+    {
+        $StationId = $this->session->userdata('station_id');
+        $UserId    = $this->session->userdata('user_id');
+
+        $uploadDir = FCPATH . "uploads/$Reference/$ReferenceId/$lastFolder/";
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $fileName = $newFileName . '_' . time() . '.' . strtolower($ext);
+
+        $this->load->library('upload');
+
+        $_FILES['file'] = [
+            'name'     => $fileName,
+            'type'     => $file['type'],
+            'tmp_name' => $file['tmp_name'],
+            'error'    => $file['error'],
+            'size'     => $file['size']
+        ];
+
+        $config = [
+            'upload_path'   => $uploadDir,
+            'allowed_types' => '*',
+            'max_size'      => 0,
+            'overwrite'     => false
+        ];
+
+        $this->upload->initialize($config);
+
+        if (!$this->upload->do_upload('file')) {
+            log_message('error', $this->upload->display_errors());
+            return false;
+        }
+
+        $this->db->insert('tbl_documents', [
+            'stationId'     => $StationId,
+            'userId'        => $UserId,
+            'referenceId'   => $ReferenceId,
+            'referenceType' => $Reference,
+            'documentTitle' => $fileName,
+            'documentPath'  => "uploads/$Reference/$ReferenceId/$lastFolder/$fileName",
+            'addedOn'       => date('Y-m-d H:i:s'),
+            'addedBy'       => $UserId
+        ]);
+
+        return true;
+    }
+
+
+
+    public function getProfileImage($Reference, $ReferenceId)
+    {
+        return $this->db
+            ->where([
+                'referenceType' => $Reference,
+                'referenceId'   => $ReferenceId,
+                'documentTitle' => 'profile_img'
+            ])
+            ->get('tbl_documents')
+            ->row();
+    }
+
+
+    function allUpload($file, $Reference = '', $ReferenceId = 0): bool
     {
         $StationId = $this->session->userdata('station_id') ?? '';
         $UserId    = $this->session->userdata('user_id') ?? '';
@@ -108,19 +264,6 @@ class Document_upload extends CI_Model
         ]);
 
         return true;
-    }
-
-
-    public function getProfileImage($Reference, $ReferenceId)
-    {
-        return $this->db
-            ->where([
-                'referenceType' => $Reference,
-                'referenceId'   => $ReferenceId,
-                'documentTitle' => 'profile_img'
-            ])
-            ->get('tbl_documents')
-            ->row();
     }
 
 

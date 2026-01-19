@@ -139,6 +139,7 @@ $StationId = $this->session->userdata('station_id') ?? '';
                                                                 $fees = $this->db
                                                                     ->where('education_type', $record->student_education_type)
                                                                     ->where('stationId', $record->stationId)
+                                                                    ->where('studentId', $record->studentId)
                                                                     ->where('classId', $record->classId)
                                                                     ->where('feeType', $type)
                                                                     ->get('tbl_fees')
@@ -374,7 +375,7 @@ $StationId = $this->session->userdata('station_id') ?? '';
         // remove previous handlers before binding
         $(document).off('submit', '.FormCollectFee');
         // submit handler
-        $(document).on('submit', '.FormCollectFee', function(e) {
+        $(document).off('submit', '.FormCollectFee').on('submit', '.FormCollectFee', function(e) {
             e.preventDefault();
 
             let form = $(this);
@@ -405,7 +406,7 @@ $StationId = $this->session->userdata('station_id') ?? '';
                     });
 
                     if (response.status) {
-                        $("#pageContent").load("<?= base_url('Cms/all_students') ?>");
+                        $("#pageContent").load("<?= base_url('Student/all_students') ?>");
                     }
                 }
             });

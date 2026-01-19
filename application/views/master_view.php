@@ -205,6 +205,11 @@
             background: var(--blue-color);
         }
 
+        .active-menu{
+            background: var(--blue-color);
+            color: white !important;
+        }
+
         .sidebar .nav_link {
             display: flex;
             align-items: center;
@@ -368,6 +373,12 @@
             e.preventDefault();
 
             var url = $(this).attr("href");
+
+            if ($(this).hasClass("side-menu-links")) {
+                $(".nav_link").removeClass("active"); // remove from all
+                $(".nav_link").removeClass("active-menu"); // remove from all
+                $(this).addClass("active-menu"); // add to clicked one
+            }
 
             if (currUrl !== url) {
                 historyStack.push(currUrl); // save current to back history

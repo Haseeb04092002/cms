@@ -49,7 +49,7 @@ class Login extends CI_Controller
                 'user_id'       => $check->userId,
                 'user_name'     => $check->username,
                 'user_email'    => $check->email,
-                'user_role'    => $check->role,
+                'user_role'    => $check->role??'admin',
                 // 'warehouse_id'  => $check->WarehouseId,
                 'station_id'    => $check->stationId,
                 // 'station_name'  => $check->StationName,
