@@ -67,7 +67,7 @@
             </li>
 
             <li class="item">
-                <a href="<?= site_url('Cms/student_attendance') ?>" class="nav_link navigator side-menu-links">
+                <a href="<?= site_url('Exams/exam_dashboard') ?>" class="nav_link navigator side-menu-links">
                     <span class="navlink_icon"><i class="bi bi-mortarboard"></i></span>
                     <span class="navlink">Exams & Results</span>
                 </a>
