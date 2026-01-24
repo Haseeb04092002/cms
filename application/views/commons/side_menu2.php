@@ -74,7 +74,7 @@
             </li>
 
             <li class="item">
-                <a href="<?= site_url('Cms/student_attendance') ?>" class="nav_link navigator side-menu-links">
+                <a href="<?= site_url('Attendance/attendance') ?>" class="nav_link navigator side-menu-links">
                     <span class="navlink_icon"><i class="bi bi-calendar-check"></i></span>
                     <span class="navlink">Attendance</span>
                 </a>
