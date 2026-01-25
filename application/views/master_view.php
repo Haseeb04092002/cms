@@ -364,7 +364,10 @@
         var currUrl = "";
 
         // Load Dashboard by default
-        currUrl = "<?= site_url('Cms/dashboard') ?>";
+        currUrl = "<?= site_url('Cms/dashboard/'). $this->session->userdata('user_role') ?>";
+
+        console.log("currUrl == "+currUrl);
+
         $("#pageContent").load(currUrl);
         historyStack.push(currUrl);
 

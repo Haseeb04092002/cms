@@ -580,6 +580,7 @@ class Student extends MY_Controller
         $this->db->where('tbl_students.isDeleted', 0);
         $this->db->where('tbl_students.studentId', $studentId);
         $student = $this->db->get()->row();
+        $admissionNo = $this->db->select('admissionNo')->where('stationId', $StationId)->where('studentId', $studentId)->get('tbl_students')->row();
         $siblings = $this->db
             ->where([
                 'stationId' => $StationId,

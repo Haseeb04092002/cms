@@ -5,8 +5,85 @@ class Login extends CI_Controller
 {
     public function index()
     {
-        $this->load->view('login');
+        $sql = "select roleName from tbl_user_roles where roleId in (25, 27, 28, 33)";
+        $user_roles = $this->db->query($sql)->result();
+        $data = array();
+        $data['user_roles'] = $user_roles;
+        $this->load->view('login', $data);
     }
+
+    public function login()
+    {
+        // Default response
+        $response = [
+            'status'  => false,
+            'message' => 'Some Error Occurred. Try Again'
+        ];
+
+        // Get input safely
+        $userRole = $this->input->post('userRole') ?? '';
+        $email    = $this->input->post('email') ?? '';
+        $password = $this->input->post('password') ?? '';
+
+        $check = null; // Initialize
+
+        // ===== ADMIN LOGIN =====
+        if ($userRole === 'Admin') {
+            $check = $this->db
+                ->get_where('tbl_users', ['Email' => $email, 'Password' => $password])
+                ->row();
+
+            if ($check) {
+                $check->username = $check->Email ?? '';
+                $check->userId   = $check->userId ?? '';
+            }
+        }
+
+        // ===== COORDINATOR / TEACHER LOGIN =====
+        elseif ($userRole === 'Coordinator' || $userRole === 'Teacher') {
+            $check = $this->db
+                ->get_where('tbl_staff', ['Password' => $password])
+                ->row();
+
+            if ($check) {
+                $check->username = $check->firstName ?? '';
+                $check->userId   = $check->staffId ?? '';
+            }
+        }
+
+        // ===== STUDENT LOGIN =====
+        elseif ($userRole === 'Student') {
+            $check = $this->db
+                ->get_where('tbl_students', ['Password' => $password])
+                ->row();
+
+            if ($check) {
+                $check->username = $check->firstName ?? '';
+                $check->userId   = $check->studentId ?? '';
+            }
+        }
+
+        // ===== Set session if login success =====
+        if ($check) {
+            $this->session->set_userdata([
+                'user_id'       => $check->userId ?? '',
+                'user_name'     => $check->username ?? '',
+                'user_email'    => $check->email ?? '',
+                'user_role'     => $userRole ?? 'Admin',
+                'station_id'    => $check->stationId ?? '',
+                'last_activity' => time()
+            ]);
+
+            $response['status']  = true;
+            $response['message'] = 'Logged-in Successfully';
+        } else {
+            $response['message'] = 'Invalid Username or Password!';
+        }
+
+        exit(json_encode($response));
+    }
+
+
 
     public function logout()
     {
@@ -14,62 +91,11 @@ class Login extends CI_Controller
         $this->session->unset_userdata([
             'user_id',
             'user_name',
-            'user_Email',
+            'user_email',
+            'station_id',
             'last_activity'
         ]);
         $this->session->sess_destroy();
-        redirect('Pakhtoon');
-    }
-
-    public function login()
-    {
-        $Response['status']  = false;
-        $Response['message']  = "Some Error Occured. Try Again";
-
-        $this->form_validation->set_rules('email', 'Email', 'required');
-        $this->form_validation->set_rules('password', 'Password', 'required');
-        // $this->form_validation->set_rules('WarehouseId', 'Warehouse', 'required');
-
-        if ($this->form_validation->run() == FALSE) {
-            $Response['message']  = validation_errors();
-        }
-
-        $email = $this->input->post('email');
-        $password = $this->input->post('password');
-        // $WarehouseId = $this->input->post('WarehouseId');
-
-        // $data = array();
-        $data['Email'] = $email;
-        $data['Password'] = $password;
-        // // $data['WarehouseId'] = $WarehouseId;
-        $check = $this->db->get_where('tbl_users', $data)->row();
-        // $check = true;
-        if ($check) {
-            $this->session->set_userdata([
-                'user_id'       => $check->userId,
-                'user_name'     => $check->username,
-                'user_email'    => $check->email,
-                'user_role'    => $check->role??'admin',
-                // 'warehouse_id'  => $check->WarehouseId,
-                'station_id'    => $check->stationId,
-                // 'station_name'  => $check->StationName,
-                'last_activity' => time()
-            ]);
-            // $this->session->set_userdata([
-            //     'user_id'       => '1',
-            //     'user_name'     => '1',
-            //     'user_Email'    => '1',
-            //     'warehouse_id'  => '1',
-            //     'station_id'    => '1',
-            //     'station_name'  => '1',
-            //     'last_activity' => time()
-            // ]);
-            // echo "here";
-            // print_r($this->session->userdata());
-            // die();
-            $Response['status']  = true;
-            $Response['message']  = "Logged-in Successfully";
-        }
-        exit(json_encode($Response));
+        redirect('Cms');
     }
 }

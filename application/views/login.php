@@ -97,21 +97,33 @@ defined('BASEPATH') or exit('No direct script access allowed');
                     <p class="text-muted small">Please login to your account</p>
                 </div>
 
-                <form id="LoginForm" class="d-flex flex-column gap-3">
+                <form id="LoginForm" class="d-flex flex-column gap-3" data-parsley-validate>
 
-                    <div class="input-group login-input">
+                    <select class="form-select" name="userRole" id="userRole" required>
+                        <option value="">-- Select User Role --</option>
+                        <?php if (!empty($user_roles)): ?>
+                            <?php foreach ($user_roles as $userRole): ?>
+                                <option value="<?= $userRole->roleName ?>">
+                                    <?= $userRole->roleName ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+
+                    <div class="input-group login-input" id="username-group">
                         <span class="input-group-text">
                             <i class="bi bi-envelope"></i>
                         </span>
-                        <input type="text" class="form-control" placeholder="Username" name="email" required>
+                        <input type="text" class="form-control" placeholder="Username" name="email">
                     </div>
 
-                    <div class="input-group login-input">
+                    <div class="input-group login-input" id="password-group">
                         <span class="input-group-text">
                             <i class="bi bi-lock"></i>
                         </span>
                         <input type="password" class="form-control" placeholder="Password" name="password" required>
                     </div>
+
 
                     <button type="submit" class="btn btn-primary login-btn">
                         Login
@@ -129,8 +141,35 @@ defined('BASEPATH') or exit('No direct script access allowed');
     </footer>
 
     <script>
+        $(document).ready(function() {
+            function toggleUsername() {
+                var role = $('#userRole').val();
+
+                if (role === 'Admin') {
+                    $('#username-group').show(); // show username
+                } else {
+                    $('#username-group').hide(); // hide username
+                }
+            }
+
+            // Initial check
+            toggleUsername();
+
+            // On change
+            $('#userRole').change(function() {
+                toggleUsername();
+            });
+        });
+
+        $(document).off('submit', '#LoginForm');
         $(document).on('submit', '#LoginForm', function(e) {
             e.preventDefault();
+
+            let form = $(this);
+
+            if (!form.parsley().validate()) {
+                return false;
+            }
 
             // Reset previous highlights
             $("#LoginForm input").removeClass("is-invalid");
@@ -149,11 +188,19 @@ defined('BASEPATH') or exit('No direct script access allowed');
                         if (response.message.includes("Password")) {
                             $("input[name='password']").addClass("is-invalid");
                         }
+                        Swal.fire({
+                            title: response.status ? 'Success' : 'Error',
+                            text: response.message,
+                            icon: response.status ? 'success' : 'error',
+                            timer: 3000,
+                            showConfirmButton: true
+                        });
 
                     } else {
                         var url = "<?= base_url('Cms') ?>";
                         console.log(url);
                         window.location.href = url;
+
                     }
                 }
             });

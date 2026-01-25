@@ -220,7 +220,7 @@ $student_img = $this->db
                             </div>
 
                             <button class="btn btn-outline-primary">
-                                <i class="bi bi-pencil-square me-2"></i> Edit Profile
+                                <i class="bi bi-pencil-square me-2"></i> Tasks
                             </button>
                             <button class="btn btn-outline-success">
                                 <i class="bi bi-cash-coin me-2"></i> Fee Details

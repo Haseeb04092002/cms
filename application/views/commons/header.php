@@ -26,12 +26,12 @@ $StationId = $this->session->userdata('station_id') ?? '';
   <div class="navbar_content">
     <!-- <i class="bi bi-grid"></i> -->
     <?php if (!empty($UserId)): ?>
-      <a href="" class="btn btn-sm btn-outline-secondary">Logout</a>
+      <a href="<?= site_url('Login/logout') ?>" class="btn btn-sm btn-outline-secondary">Logout</a>
     <?php endif; ?>
     <?php if (empty($UserId)): ?>
       <a href="" class="btn btn-sm btn-outline-secondary">Login</a>
     <?php endif; ?>
-    <a href="" class="btn btn-sm btn-outline-secondary">Change Campus</a>
+    <!-- <a href="" class="btn btn-sm btn-outline-secondary">Change Campus</a> -->
     <!-- <i class='bx bx-sun' id="darkLight"></i> -->
     <!-- <a href="" id="frame-refresh"><i class="bi bi-arrow-clockwise">refresh</i></a> -->
     <a href="" title="Refresh" id="frame-refresh" class="btn btn-sm btn-success py-0"><i class="bi bi-arrow-clockwise text-light py-0"></i></a>
@@ -40,6 +40,6 @@ $StationId = $this->session->userdata('station_id') ?? '';
       <a id="forwardFrame" title="Go Forward" class="py-0 border btn-sm px-3 btn btn-primary"><i class="text-light bi bi-box-arrow-right"></i></a>
     </div>
     <i class='bx bx-bell'></i>
-    <img src="<?= base_url('assets/img/profile.jpg') ?>" alt="" class="profile" />
+    <!-- <img src="<?= base_url('assets/img/profile.jpg') ?>" alt="" class="profile" /> -->
   </div>
 </nav>

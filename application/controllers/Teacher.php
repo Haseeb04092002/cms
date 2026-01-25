@@ -4,6 +4,13 @@ defined('BASEPATH') or exit('No direct script access allowed');
 class Teacher extends MY_Controller
 {
 
+	public function dashboard()
+	{
+		$data = array();
+		$data['all_teachers'] = $this->Teacher_model->get_all_teachers();
+		$this->load->view('pages/teacher/dashboard', $data);
+	}
+
 	public function all_teachers()
 	{
 		$data = array();
