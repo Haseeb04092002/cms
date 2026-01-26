@@ -149,6 +149,7 @@ $student_img = $this->db
                                                             <input type="text"
                                                                 name="old_password"
                                                                 class="form-control password-field"
+                                                                value="<?= $student->password ?>"
                                                                 required>
 
                                                             <span class="input-group-text toggle-password" role="button">
@@ -163,8 +164,9 @@ $student_img = $this->db
                                                 <?php endif; ?>
                                                 <!-- NEW PASSWORD -->
                                                 <div class="mb-3">
-                                                    <label class="form-label fw-semibold">New Password</label>
-
+                                                    <label class="d-block pb-0 mb-0 form-label fw-semibold">New Password</label>
+                                                    <small class="pt-0 mt-0 text-success">better to use suggested system password</small>
+                                                    <button id="re-generate-password-btn" class="mt-0 p-1 py-0 rounded-1 btn btn-sm btn-outline-success">Re-generate</button>
                                                     <div class="input-group">
                                                         <span class="input-group-text">
                                                             <i class="bi bi-key"></i>
@@ -173,6 +175,7 @@ $student_img = $this->db
                                                         <input type="password"
                                                             name="new_password"
                                                             class="form-control password-field"
+                                                            id="new-password"
                                                             required>
 
                                                         <span class="input-group-text toggle-password" role="button">
@@ -379,60 +382,120 @@ $student_img = $this->db
 </div>
 
 <script>
-    $('.FormPassword').parsley();
+    $(document).ready(function() {
+        function generateStrongPassword(minLen = 6, maxLen = 8) {
 
-    $(document).off('submit', '.FormPassword');
-    $(document).on('submit', '.FormPassword', function(e) {
-        e.preventDefault();
+            const lower = 'abcdefghijklmnopqrstuvwxyz';
+            const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const digits = '0123456789';
+            const special = '!@#$%^&*()-_=+[]{}<>?';
 
-        let form = $(this);
+            let password = [];
 
-        let formData = new FormData(this);
+            // Ensure required characters
+            password.push(lower[Math.floor(Math.random() * lower.length)]);
+            password.push(upper[Math.floor(Math.random() * upper.length)]);
+            password.push(digits[Math.floor(Math.random() * digits.length)]);
+            password.push(special[Math.floor(Math.random() * special.length)]);
 
-        $.ajax({
-            url: "<?= site_url('Student/save_password/') . $student->studentId ?>",
-            type: "POST",
-            data: formData,
-            dataType: "json",
-            cache: false,
-            contentType: false,
-            processData: false,
-            success: function(response) {
+            // Random length between 6–8
+            let length = Math.floor(Math.random() * (maxLen - minLen + 1)) + minLen;
 
-                let modalEl = form.closest('.modal');
-                let modal = bootstrap.Modal.getInstance(modalEl[0]);
-                if (modal) modal.hide();
+            // Character pool
+            let all = lower + upper + digits + special;
 
-                Swal.fire({
-                    title: response.status ? 'Success' : 'Error',
-                    text: response.message,
-                    icon: response.status ? 'success' : 'error',
-                    timer: 300000,
-                    showConfirmButton: true
-                });
+            for (let i = password.length; i < length; i++) {
+                password.push(all[Math.floor(Math.random() * all.length)]);
+            }
 
-                if (response.status) {
-                    $("#pageContent").load("<?= base_url('Student/student_profileTasks/') . $student->studentId . '/' . $student->admissionNo ?>");
-                }
+            // Shuffle array (Fisher–Yates)
+            for (let i = password.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [password[i], password[j]] = [password[j], password[i]];
+            }
+
+            return password.join('');
+        }
+
+        /* ===== Regex Validation ===== */
+        function validatePassword(pwd) {
+            const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d])\S{6,8}$/;
+            return regex.test(pwd);
+        }
+
+        let pwd = generateStrongPassword();
+        if (validatePassword(pwd)) {
+            $("#new-password").val(pwd);
+            console.log("✅ Valid password (Regex matched)");
+        } else {
+            console.log("❌ Invalid password (Regex failed)");
+        }
+
+        $("#re-generate-password-btn").on('click', function(e) {
+            let pwd = generateStrongPassword();
+            if (validatePassword(pwd)) {
+                $("#new-password").val(pwd);
+                console.log("✅ Valid password (Regex matched)");
+            } else {
+                console.log("❌ Invalid password (Regex failed)");
             }
         });
-    });
 
-    document.querySelectorAll('.toggle-password').forEach(toggle => {
-        toggle.addEventListener('click', function() {
+        $('.FormPassword').parsley();
 
-            const input = this.closest('.input-group').querySelector('.password-field');
-            const icon = this.querySelector('i');
+        $(document).off('submit', '.FormPassword');
+        $(document).on('submit', '.FormPassword', function(e) {
+            e.preventDefault();
 
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('bi-eye');
-                icon.classList.add('bi-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('bi-eye-slash');
-                icon.classList.add('bi-eye');
-            }
+            let form = $(this);
+
+            let formData = new FormData(this);
+
+            $.ajax({
+                url: "<?= site_url('Student/save_password/') . $student->studentId ?>",
+                type: "POST",
+                data: formData,
+                dataType: "json",
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+
+                    let modalEl = form.closest('.modal');
+                    let modal = bootstrap.Modal.getInstance(modalEl[0]);
+                    if (modal) modal.hide();
+
+                    Swal.fire({
+                        title: response.status ? 'Success' : 'Error',
+                        text: response.message,
+                        icon: response.status ? 'success' : 'error',
+                        timer: 300000,
+                        showConfirmButton: true
+                    });
+
+                    if (response.status) {
+                        $("#pageContent").load("<?= base_url('Student/student_profileTasks/') . $student->studentId . '/' . $student->admissionNo ?>");
+                    }
+                }
+            });
+        });
+
+        document.querySelectorAll('.toggle-password').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+
+                const input = this.closest('.input-group').querySelector('.password-field');
+                const icon = this.querySelector('i');
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('bi-eye');
+                    icon.classList.add('bi-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('bi-eye-slash');
+                    icon.classList.add('bi-eye');
+                }
+            });
         });
     });
 </script>

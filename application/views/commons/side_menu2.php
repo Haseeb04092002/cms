@@ -57,7 +57,7 @@ $UserRole = $this->session->userdata('user_role') ?? '';
             </li>
 
             <li class="<?= ($UserRole == 'Admin') ? 'd-block' : 'd-none' ?> item">
-                <a href="<?= site_url('Timetable/time_table_chart') ?>" class="nav_link navigator side-menu-links">
+                <a href="<?= site_url('Timetable/all_classes') ?>" class="nav_link navigator side-menu-links">
                     <span class="navlink_icon"><i class="bi bi-clock-history"></i></span>
                     <span class="navlink">Time Table</span>
                 </a>
@@ -125,13 +125,52 @@ $UserRole = $this->session->userdata('user_role') ?? '';
             <!-- TEACHER MENUS -->
             <!-- ================================ -->
 
+            <!-- Teacher Dashboard -->
             <li class="<?= ($UserRole == 'Teacher') ? 'd-block' : 'd-none' ?> item">
                 <a href="<?= site_url('Teacher/dashboard') ?>" class="nav_link navigator side-menu-links">
                     <span class="navlink_icon"><i class="bi bi-speedometer2"></i></span>
-                    <span class="navlink">Teacher Dashboard</span>
+                    <span class="navlink">My Dashboard</span>
                 </a>
             </li>
 
+            <!-- Attendance -->
+            <li class="<?= ($UserRole == 'Teacher') ? 'd-block' : 'd-none' ?> item">
+                <a href="<?= site_url('Teacher/all_classes') ?>" class="nav_link navigator side-menu-links">
+                    <span class="navlink_icon"><i class="bi bi-clipboard-check"></i></span>
+                    <span class="navlink">Attendance</span>
+                </a>
+            </li>
+
+            <!-- My Tasks -->
+            <li class="<?= ($UserRole == 'Teacher') ? 'd-block' : 'd-none' ?> item">
+                <a href="<?= site_url('Teacher/tasks') ?>" class="nav_link navigator side-menu-links">
+                    <span class="navlink_icon"><i class="bi bi-list-check"></i></span>
+                    <span class="navlink">Task Assignment</span>
+                </a>
+            </li>
+
+            <!-- My Timetable -->
+            <li class="<?= ($UserRole == 'Teacher') ? 'd-block' : 'd-none' ?> item">
+                <a href="<?= site_url('Teacher/timetable') ?>" class="nav_link navigator side-menu-links">
+                    <span class="navlink_icon"><i class="bi bi-calendar-week"></i></span>
+                    <span class="navlink">My Timetable</span>
+                </a>
+            </li>
+
+            <!-- Notifications -->
+            <li class="<?= ($UserRole == 'Teacher') ? 'd-block' : 'd-none' ?> item">
+                <a href="<?= site_url('Teacher/notifications') ?>" class="nav_link navigator side-menu-links">
+                    <span class="navlink_icon"><i class="bi bi-bell"></i></span>
+                    <span class="navlink">Notifications</span>
+                </a>
+            </li>
+
+            <li class="<?= ($UserRole == 'Teacher') ? 'd-block' : 'd-none' ?> item">
+                <a href="<?= site_url('Chatting/chats') ?>" class="nav_link navigator side-menu-links">
+                    <span class="navlink_icon"><i class="bi bi-chat-square-text"></i></span>
+                    <span class="navlink">Feedback Portal</span>
+                </a>
+            </li>
 
 
 
@@ -179,6 +218,13 @@ $UserRole = $this->session->userdata('user_role') ?? '';
                 <a href="<?= site_url('Cms/exams') ?>" class="nav_link navigator side-menu-links">
                     <span class="navlink_icon"><i class="bi bi-pencil-square"></i></span>
                     <span class="navlink">Exams</span>
+                </a>
+            </li>
+
+            <li class="<?= ($UserRole == 'Student') ? 'd-block' : 'd-none' ?> item">
+                <a href="<?= site_url('Chatting/chats') ?>" class="nav_link navigator side-menu-links">
+                    <span class="navlink_icon"><i class="bi bi-chat-square-text"></i></span>
+                    <span class="navlink">Feedback Portal</span>
                 </a>
             </li>
 

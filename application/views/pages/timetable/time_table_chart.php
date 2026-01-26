@@ -50,59 +50,44 @@
                     <tr>
                         <th>Days</th>
 
-                        <th>
-                            <button class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#timeModal">
-                                <div class="fw-bold">1st</div>
-                                <small>08:40 – 09:20</small>
-                            </button>
-                        </th>
+                        <?php
+                        $count = 1;
+                        // print_r($timeTable);
+                        // die();
+                        foreach ($timeTable as $record):
+                        ?>
 
-                        <th>
-                            <button class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#timeModal">
-                                <div class="fw-bold">2nd</div>
-                                <small>09:20 – 10:00</small>
-                            </button>
-                        </th>
+                            <th>
+                                <button class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#timeModal">
+                                    <div class="fw-bold">Lecture # <?= $count ?></div>
+                                    <small><?= $timeTable->startTime ?? '' ?> – <?= $timeTable->endTime ?? '' ?></small>
+                                </button>
+                            </th>
 
-                        <th>
-                            <button class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#timeModal">
-                                <div class="fw-bold">3rd</div>
-                                <small>10:00 – 10:40</small>
-                            </button>
-                        </th>
+                        <?php
+                        $count++;
+                        endforeach;
+                        ?>
 
-                        <th>
-                            <button class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#timeModal">
-                                <div class="fw-bold">4th</div>
-                                <small>11:00 – 11:40</small>
-                            </button>
-                        </th>
-
-                        <th>
-                            <button class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#timeModal">
-                                <div class="fw-bold">5th</div>
-                                <small>11:40 – 12:20</small>
-                            </button>
-                        </th>
                     </tr>
                 </thead>
 
                 <!-- SUBJECT ROWS -->
                 <tbody>
 
-                    <?php for ($i=1; $i <= 7; $i++): ?>
+                    <?php foreach ($days as $record): ?>
 
-                    <tr>
-                        <th class="table-light">Monday</th>
+                        <tr>
+                            <th class="table-light"><?= $record??'' ?></th>
 
-                        <td><button class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#subjectModal"><strong>English</strong><br><small>Mr. Ali</small></button></td>
-                        <td><button class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#subjectModal"><strong>Maths</strong><br><small>Ms. Sana</small></button></td>
-                        <td><button class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#subjectModal"><strong>Computer</strong><br><small>Mr. Ahmed</small></button></td>
-                        <td><button class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#subjectModal"><strong>Physics</strong><br><small>Dr. Usman</small></button></td>
-                        <td><button class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#subjectModal"><strong>Urdu</strong><br><small>Ms. Fatima</small></button></td>
-                    </tr>
+                            <td><button class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#subjectModal"><strong>English</strong><br><small>Mr. Ali</small></button></td>
+                            <td><button class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#subjectModal"><strong>Maths</strong><br><small>Ms. Sana</small></button></td>
+                            <td><button class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#subjectModal"><strong>Computer</strong><br><small>Mr. Ahmed</small></button></td>
+                            <td><button class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#subjectModal"><strong>Physics</strong><br><small>Dr. Usman</small></button></td>
+                            <td><button class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#subjectModal"><strong>Urdu</strong><br><small>Ms. Fatima</small></button></td>
+                        </tr>
 
-                    <?php endfor; ?>
+                    <?php endforeach; ?>
 
                 </tbody>
             </table>

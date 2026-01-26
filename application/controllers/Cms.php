@@ -16,11 +16,28 @@ class Cms extends MY_Controller
 				$this->load->view('pages/admin/dashboard');
 				break;
 
-			case 'Student':
+			case 'Teacher':
+				$UserId = '';
+				$UserName = '';
+				$UserEmail = '';
+				$UserRole = '';
+				$StationId = '';
+				$UserId = $this->session->userdata('user_id') ?? '';
+				$UserName = $this->session->userdata('user_name') ?? '';
+				$UserEmail = $this->session->userdata('user_email') ?? '';
+				$UserRole = $this->session->userdata('user_role') ?? '';
+				$StationId = $this->session->userdata('station_id') ?? '';
 
+				$data = array();
+				$teacher = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->where('staffId', $UserId)->get('tbl_staff')->row();
+				$data['teacher'] = $teacher;
+				// $data['suggested_password'] = $this->generate_strong_password(6,8);
+				$this->load->view('pages/teacher/dashboard', $data);
+				break;
+
+			case 'Student':
 				// echo "here";
 				// die();
-
 				$UserId = '';
 				$UserName = '';
 				$UserEmail = '';

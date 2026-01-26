@@ -167,7 +167,10 @@
                                 <td><?= $teacher->joiningDate ?></td>
                                 <td><?= $teacher->salary ?></td>
                                 <td>
-                                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editModal<?= $teacher->staffId ?>">
+                                    <a href="<?= site_url('Teacher/dashboard/') . $teacher->staffId ?>" class="navigator btn btn-sm btn-primary">
+                                        View
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?= $teacher->staffId ?>">
                                         Edit
                                     </button>
                                     <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal<?= $teacher->staffId ?>">
