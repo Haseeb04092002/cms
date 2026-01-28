@@ -57,7 +57,7 @@ $UserRole = $this->session->userdata('user_role') ?? '';
             </li>
 
             <li class="<?= ($UserRole == 'Admin') ? 'd-block' : 'd-none' ?> item">
-                <a href="<?= site_url('Timetable/all_classes') ?>" class="nav_link navigator side-menu-links">
+                <a href="<?= site_url('Timetable/time_table_dashboard') ?>" class="nav_link navigator side-menu-links">
                     <span class="navlink_icon"><i class="bi bi-clock-history"></i></span>
                     <span class="navlink">Time Table</span>
                 </a>
@@ -108,7 +108,7 @@ $UserRole = $this->session->userdata('user_role') ?? '';
             <li class="<?= ($UserRole == 'Admin') ? 'd-block' : 'd-none' ?> item">
                 <a href="<?= site_url('Chatting/chats') ?>" class="nav_link navigator side-menu-links">
                     <span class="navlink_icon"><i class="bi bi-chat-square-text"></i></span>
-                    <span class="navlink">Feedback Portal</span>
+                    <span class="navlink">Chatting</span>
                 </a>
             </li>
 
@@ -168,7 +168,7 @@ $UserRole = $this->session->userdata('user_role') ?? '';
             <li class="<?= ($UserRole == 'Teacher') ? 'd-block' : 'd-none' ?> item">
                 <a href="<?= site_url('Chatting/chats') ?>" class="nav_link navigator side-menu-links">
                     <span class="navlink_icon"><i class="bi bi-chat-square-text"></i></span>
-                    <span class="navlink">Feedback Portal</span>
+                    <span class="navlink">Chatting</span>
                 </a>
             </li>
 
@@ -224,13 +224,13 @@ $UserRole = $this->session->userdata('user_role') ?? '';
             <li class="<?= ($UserRole == 'Student') ? 'd-block' : 'd-none' ?> item">
                 <a href="<?= site_url('Chatting/chats') ?>" class="nav_link navigator side-menu-links">
                     <span class="navlink_icon"><i class="bi bi-chat-square-text"></i></span>
-                    <span class="navlink">Feedback Portal</span>
+                    <span class="navlink">Chatting</span>
                 </a>
             </li>
 
 
             <li class="item">
-                <a href="https://inklings.com.pk" target="_blank" class="nav_link">
+                <a href="#" class="nav_link">
                     <span class="navlink_icon"><i class="bi bi-globe"></i></span>
                     <span class="navlink">School Website</span>
                 </a>

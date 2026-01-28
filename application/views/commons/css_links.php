@@ -1,10 +1,14 @@
 <!-- ================= CORE CSS ================= -->
 
-<!-- Bootstrap CSS (Local OR CDN – keep ONE) -->
-<link href="<?= base_url('assets/css/itimium_theme.css'); ?>" rel="stylesheet">
+<!-- Bootstrap CSS (Choose ONE: Local OR CDN) -->
 <link href="<?= base_url('assets/css/bootstrap.min.css'); ?>" rel="stylesheet">
-<!-- OR use CDN instead of local (not both) -->
+<!-- OR CDN -->
 <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+
+<!-- Theme / Base Styles -->
+<link href="<?= base_url('assets/css/itimium_theme.css'); ?>" rel="stylesheet">
+
+<!-- ================= ICONS ================= -->
 
 <!-- Bootstrap Icons -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
@@ -30,6 +34,9 @@
 <!-- Parsley Validation -->
 <link rel="stylesheet" href="<?= base_url('assets/css/parsley.css'); ?>">
 
+<!-- Flatpickr -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
 <!-- ================= FONTS ================= -->
 
 <!-- Google Fonts -->
@@ -39,5 +46,5 @@
 
 <!-- ================= CUSTOM CSS ================= -->
 
-<!-- Your main custom styles (keep LAST) -->
+<!-- Main Custom Styles (Always LAST) -->
 <!-- <link href="<?= base_url('assets/css/style.css'); ?>" rel="stylesheet"> -->

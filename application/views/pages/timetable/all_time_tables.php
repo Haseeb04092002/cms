@@ -1,11 +1,11 @@
 <div class="p-4">
-    <h3 class="fw-bold mb-4">Select any class to set <span class="text-success"><?= $slotNumber ?> slots time table</span></h3>
+    <h3 class="fw-bold mb-4">Select class to view time table</span></h3>
 
     <div class="row g-4">
 
         <?php foreach ($classes as $class):
             if (!empty($class->total_students) && $class->total_students > 0) {
-                $link = site_url('Timetable/time_table_chart/' . $class->classId . '/add/' . $slotNumber );
+                $link = site_url('Timetable/time_table_chart/' . $class->classId);
             } else {
                 $link = "javascript:void(0);";
             }
