@@ -28,6 +28,7 @@ class Timetable extends MY_Controller
 				$subjects = $this->db->select('subjectName, subjectId')->where('stationId', $StationId)->where('isDeleted', 0)->get('tbl_subjects')->result();
 				$teachers = $this->db->select('firstName, lastName, staffId')->where('stationId', $StationId)->where('isDeleted', 0)->get('tbl_staff')->result();
 				$data = array();
+				$data['className'] = $this->db->select('className, sectionName')->where('stationId', $StationId)->where('isDeleted', 0)->where('classId', $classId)->get('tbl_classes')->row();
 				$data['slotNumber'] = $slotNumber;
 				$data['days'] = $days;
 				$data['subjects'] = $subjects;
@@ -39,58 +40,103 @@ class Timetable extends MY_Controller
 
 			case 'edit':
 
-				// $this->db->select('*');
-				$this->db->select('
-					tbl_time_table.*,
-					tbl_staff.firstName,
-					tbl_staff.lastName,
-					tbl_subjects.subjectName,
-					tbl_classes.className,
-					tbl_classes.sectionName
-				');
-				$this->db->from('tbl_time_table');
-				$this->db->join('tbl_classes', 'tbl_time_table.classId = tbl_classes.classId', 'left');
-				$this->db->join('tbl_staff', 'tbl_time_table.teacherId = tbl_staff.staffId', 'left');
-				$this->db->join('tbl_subjects', 'tbl_time_table.subjectId = tbl_subjects.subjectId', 'left');
-				$this->db->where('tbl_time_table.stationId', $StationId);
-				$this->db->where('tbl_time_table.isDeleted', 0);
-				$this->db->where('tbl_time_table.classId', $classId);
-				$timeTable = $this->db->get()->result();
+				$rawData = $this->db->select('
+					tt.timeTableId,
+					tt.stationId,
+					tt.userId,
+					tt.classId,
+					tt.subjectId,
+					tt.teacherId,
+					tt.dayName,
+					tt.periodNo,
+					tt.startTime,
+					tt.endTime,
 
-				$query = $this->db->query("SHOW COLUMNS FROM tbl_time_table LIKE 'dayName'");
-				$row = $query->row();
+					s.subjectName,
+					CONCAT(staff.firstName," ",staff.lastName) AS teacherName,
+					CONCAT(c.className," ",c.sectionName) AS className
+				')
+					->from('tbl_time_table tt')
+					->join('tbl_subjects s', 's.subjectId = tt.subjectId', 'left')
+					->join('tbl_staff staff', 'staff.staffId = tt.teacherId', 'left')
+					->join('tbl_classes c', 'c.classId = tt.classId', 'left')
+					->where('tt.stationId', $StationId)
+					->where('tt.classId', $classId)
+					->where('tt.isDeleted', 0)
+					->order_by('tt.dayName', 'ASC')
+					->order_by('tt.periodNo', 'ASC')
+					->get()
+					->result();
 
-				$days = [];
+				$timetableData = [];
+				$timeSlots     = [];
+				$className = '';
 
-				if ($row) {
-					$enum = str_replace(["enum(", ")", "'"], "", $row->Type);
-					$days = explode(",", $enum);
+				foreach ($rawData as $row) {
+
+					// Day + Period mapping
+					$timetableData[$row->dayName][$row->periodNo] = [
+						'subject_id'   => $row->subjectId,
+						'subject_name' => $row->subjectName,
+						'teacher_id'   => $row->teacherId,
+						'teacher_name' => $row->teacherName,
+						'class_id'     => $row->classId,
+						'class_name'   => $row->className,
+						'startTime'    => $row->startTime,
+						'endTime'      => $row->endTime,
+					];
+
+					// Slot time mapping
+					$timeSlots[$row->periodNo] = [
+						'startTime' => $row->startTime,
+						'endTime'   => $row->endTime
+					];
+
+					$className = $row->className;
 				}
 
-				// print_r($this->db->last_query());
+				$subjects = $this->db->select('subjectName, subjectId')->where('stationId', $StationId)->where('isDeleted', 0)->get('tbl_subjects')->result();
+				$teachers = $this->db->select('firstName, lastName, staffId')->where('stationId', $StationId)->where('isDeleted', 0)->get('tbl_staff')->result();
+				$data['subjects'] = $subjects;
+				$data['teachers'] = $teachers;
+				$data['className'] = $className;
+				$data['classId'] = $classId;
+				$data['timetableData'] = $timetableData;
+				$data['timeSlots']     = $timeSlots;
+				$data['slotNumber']    = count($timeSlots);
+				$data['days']          = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
 				// echo "<br>";
 				// echo "<pre>";
-				// print_r($timeTable);
+				// print_r($data);
 				// die();
-
-				$data = array();
-
-				$data['timeTable'] = $timeTable;
-				$data['days'] = $days;
 
 				$this->load->view('pages/timetable/time_table_chart_edit', $data);
 
 				break;
-
-			case 'view':
-				
-				break;
 		}
 	}
 
-	public function time_table_templates()
+	public function time_table_templates($classId = '')
 	{
-		$this->load->view('pages/timetable/templates');
+		$UserId = '';
+		$UserName = '';
+		$UserEmail = '';
+		$UserRole = '';
+		$StationId = '';
+		$UserId = $this->session->userdata('user_id') ?? '';
+		$UserName = $this->session->userdata('user_name') ?? '';
+		$UserEmail = $this->session->userdata('user_email') ?? '';
+		$UserRole = $this->session->userdata('user_role') ?? '';
+		$StationId = $this->session->userdata('station_id') ?? '';
+
+		if ($classId > 0) {
+			$data['className'] = $this->db->select('className, sectionName')->where('stationId', $StationId)->where('isDeleted', 0)->where('classId', $classId)->get('tbl_classes')->row();
+			$data['classId'] = $classId;
+			$this->load->view('pages/timetable/templates', $data);
+		} else {
+			$this->load->view('pages/timetable/templates');
+		}
 	}
 
 	public function all_time_tables()
@@ -112,7 +158,7 @@ class Timetable extends MY_Controller
 
 		// echo "<br>";
 		// echo "<pre>";
-		// print_r($data['student']);
+		// print_r($data['classes']);
 		// die();
 
 		$this->load->view('pages/timetable/all_time_tables', $data);
@@ -192,7 +238,24 @@ class Timetable extends MY_Controller
 				break;
 
 			case 'edit':
-				# code...
+
+				// Soft delete old timetable
+				$this->db->where('classId', $classId);
+				$this->db->where('stationId', $StationId);
+				$this->db->where('isDeleted', 0);
+				$this->db->update('tbl_time_table', [
+					'isDeleted' => 1
+				]);
+
+				// Insert new timetable
+				if (!empty($insertBatch)) {
+					$this->db->insert_batch('tbl_time_table', $insertBatch);
+				}
+
+				if ($this->db->affected_rows() > 0) {
+					$Response['status']  = true;
+					$Response['message'] = "Time Table Saved Successfully";
+				}
 				break;
 		}
 
@@ -200,9 +263,41 @@ class Timetable extends MY_Controller
 		return;
 	}
 
+	public function delete_timetable()
+	{
+		$UserId = '';
+		$UserName = '';
+		$UserEmail = '';
+		$UserRole = '';
+		$StationId = '';
+		$UserId = $this->session->userdata('user_id') ?? '';
+		$UserName = $this->session->userdata('user_name') ?? '';
+		$UserEmail = $this->session->userdata('user_email') ?? '';
+		$UserRole = $this->session->userdata('user_role') ?? '';
+		$StationId = $this->session->userdata('station_id') ?? '';
 
+		$Response['status']  = false;
+		$Response['message'] = "Some Error Occured. Try Again";
 
-	public function all_classes($slotNumber = '')
+		$classId = $this->input->post('classId');
+
+		$this->db->where('classId', $classId);
+		$this->db->where('stationId', $StationId);
+		$this->db->where('isDeleted', 0);
+		$this->db->update('tbl_time_table', [
+			'isDeleted' => 1
+		]);
+
+		if ($this->db->affected_rows() > 0) {
+			$Response['status']  = true;
+			$Response['message'] = "Time Table Deleted Successfully";
+		}
+
+		exit(json_encode($Response));
+		return;
+	}
+
+	public function all_classes($slotNumber = '', $classId = '')
 	{
 
 		$UserId = '';
@@ -217,16 +312,18 @@ class Timetable extends MY_Controller
 		$StationId = $this->session->userdata('station_id') ?? '';
 
 		$data = array();
-
-		$data['classes'] = $this->Class_model->get_all_classes_with_student_count($StationId);
-		$data['slotNumber'] = $slotNumber;
 		$data['slotNumber'] = $slotNumber;
 
 		// echo "<br>";
 		// echo "<pre>";
-		// print_r($data['student']);
+		// print_r($data);
 		// die();
 
-		$this->load->view('pages/timetable/all_classes', $data);
+		if ($classId > 0) {
+			redirect('Timetable/time_table_chart/' . $classId . '/add/' . $slotNumber);
+		} else {
+			$data['classes'] = $this->Class_model->get_all_classes_with_student_count($StationId);
+			$this->load->view('pages/timetable/all_classes', $data);
+		}
 	}
 }

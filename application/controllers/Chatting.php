@@ -16,7 +16,9 @@ class Chatting extends MY_Controller
 		$UserRole = $this->session->userdata('user_role') ?? '';
 		$StationId = $this->session->userdata('station_id') ?? '';
 
-		$all_messages = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->order_by('addedOn', 'DESC')->get('tbl_messages')->result();
+		// $all_messages = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->order_by('addedOn', 'DESC')->get('tbl_messages')->result();
+		$all_students = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->get('tbl_students')->result();
+		$all_staff = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->get('tbl_staff')->result();
 
 		$this->db->select('
             tbl_messages.*,
@@ -33,8 +35,11 @@ class Chatting extends MY_Controller
 		$this->db->where('tbl_messages.receiverId', $UserId);
 		$this->db->where('tbl_messages.isDeleted', 0);
 		$this->db->group_by('tbl_messages.studentId');
+		$all_messages = $this->db->get()->result();
 
 		$data['all_messages'] = $all_messages;
+		$data['all_students'] = $all_students;
+		$data['all_staff'] = $all_staff;
 
 		$this->load->view('pages/chatting/chats', $data);
 	}

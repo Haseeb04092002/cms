@@ -1,5 +1,11 @@
 <div class="p-4">
-    <h3 class="fw-bold mb-4 text-start">Time Table Chart</h3>
+    <h3 class="fw-bold mb-4 text-start">
+        Time Table Chart
+        <?php if (isset($className)): ?>
+            <span><?= $className->className ?> <?= $className->sectionName ?></span>
+        <?php endif; ?>
+
+    </h3>
 
     <!-- Minimal Enhancement CSS -->
     <style>
@@ -60,7 +66,7 @@
                                         data-bs-target="#timeModal_<?= $i ?>">
 
                                         <div class="fw-bold">Lecture # <?= $i ?></div>
-                                        <small class="time-text">
+                                        <small class="time-text text-dark">
                                             <?= $timeTable->startTime ?? '' ?> – <?= $timeTable->endTime ?? '' ?>
                                         </small>
 
@@ -138,8 +144,8 @@
                                             data-bs-toggle="modal"
                                             data-bs-target="#subjectModal_<?= $record ?>_<?= $i ?>">
 
-                                            <strong class="subject-text">Subject</strong><br>
-                                            <small class="teacher-text">Teacher</small>
+                                            <strong class="subject-text text-dark">Subject</strong><br>
+                                            <small class="teacher-text text-dark">Teacher</small>
 
                                             <!-- Structured Hidden Inputs -->
                                             <input type="hidden"
@@ -220,14 +226,26 @@
 
                     </tbody>
                 </table>
-                <!-- Submit -->
-                <div class="justify-content-end mt-4 d-flex align-items-center">
-                    <button class="btn btn-success w-25" type="submit">
-                        Save
-                    </button>
-                    <button class="btn btn-warning w-25" type="reset">
-                        Reset
-                    </button>
+                <div class="d-flex justify-content-end align-items-center mb-3">
+
+                    <!-- Right: Action Buttons -->
+                    <div class="d-flex gap-2">
+
+                        <!-- Update Button -->
+                        <button type="submit" form="TimeTableForm" class="btn btn-primary">
+                            Save
+                        </button>
+
+                        <!-- Reset Button -->
+                        <button type="reset"
+                            class="btn btn-warning"
+                            data-bs-toggle="modal"
+                            data-bs-target="#resetTimeTableModal">
+                            Reset
+                        </button>
+
+                    </div>
+
                 </div>
             </form>
         </div>
@@ -249,7 +267,7 @@
             defaultMinute: 0
         });
 
-        $(document).on('submit', '#TimeTableForm', function(e) {
+        $(document).off('submit', '#TimeTableForm').on('submit', '#TimeTableForm', function(e) {
 
             e.preventDefault();
 

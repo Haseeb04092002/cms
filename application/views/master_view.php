@@ -205,7 +205,7 @@
             background: var(--blue-color);
         }
 
-        .active-menu{
+        .active-menu {
             background: var(--blue-color);
             color: white !important;
         }
@@ -364,9 +364,9 @@
         var currUrl = "";
 
         // Load Dashboard by default
-        currUrl = "<?= site_url('Cms/dashboard/'). $this->session->userdata('user_role') ?>";
+        currUrl = <?= json_encode(site_url('Cms/dashboard/') . $this->session->userdata('user_role')) ?>;
 
-        console.log("currUrl == "+currUrl);
+        console.log("currUrl == " + currUrl);
 
         $("#pageContent").load(currUrl);
         historyStack.push(currUrl);
@@ -389,6 +389,7 @@
             }
 
             currUrl = url;
+            console.log("currUrl == " + currUrl);
             $("#pageContent").load(currUrl);
         });
 
@@ -397,6 +398,7 @@
             e.preventDefault();
 
             if (currUrl) {
+                console.log("currUrl == " + currUrl);
                 $("#pageContent").load(currUrl);
             }
         });
@@ -408,6 +410,7 @@
             if (historyStack.length > 0) {
                 forwardStack.push(currUrl); // save current for forward
                 currUrl = historyStack.pop(); // go back
+                console.log("currUrl == " + currUrl);
                 $("#pageContent").load(currUrl);
             }
         });
@@ -419,6 +422,7 @@
             if (forwardStack.length > 0) {
                 historyStack.push(currUrl); // save current for back
                 currUrl = forwardStack.pop(); // go forward
+                console.log("currUrl == " + currUrl);
                 $("#pageContent").load(currUrl);
             }
         });

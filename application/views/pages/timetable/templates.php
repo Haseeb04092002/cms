@@ -1,5 +1,9 @@
 <div class="p-4">
-    <h3 class="fw-bold mb-4">Select any class to set time table</h3>
+    <h3 class="fw-bold mb-4">Select any slot for lectures to set time table
+        <?php if (isset($className)): ?>
+            <span><?= $className->className ?> <?= $className->sectionName ?></span>
+        <?php endif; ?>
+    </h3>
 
     <style>
         .timetable-circle {
@@ -29,10 +33,17 @@
 
     <div class="row g-3">
 
-        <?php for ($i = 3; $i <= 14; $i++): ?>
+        <?php
+        for ($i = 3; $i <= 14; $i++):
+            if (isset($classId) && $classId > 0) {
+                $link = site_url('Timetable/all_classes/') . $i . '/' . $classId;
+            } else {
+                $link = site_url('Timetable/all_classes/') . $i;
+            }
+        ?>
 
             <div class="col-xl-3 col-lg-4 col-md-3 col-sm-6">
-                <a href="<?= site_url('Timetable/all_classes/') . $i ?>" class="navigator text-decoration-none text-dark">
+                <a href="<?= $link ?>" class="navigator text-decoration-none text-dark">
 
                     <div class="card h-100 shadow-sm border-0 timetable-card">
                         <div class="card-body text-center d-flex flex-column align-items-center justify-content-center">

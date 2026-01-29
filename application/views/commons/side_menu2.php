@@ -57,7 +57,7 @@ $UserRole = $this->session->userdata('user_role') ?? '';
             </li>
 
             <li class="<?= ($UserRole == 'Admin') ? 'd-block' : 'd-none' ?> item">
-                <a href="<?= site_url('Timetable/time_table_dashboard') ?>" class="nav_link navigator side-menu-links">
+                <a href="<?= site_url('Timetable/all_time_tables') ?>" class="nav_link navigator side-menu-links">
                     <span class="navlink_icon"><i class="bi bi-clock-history"></i></span>
                     <span class="navlink">Time Table</span>
                 </a>

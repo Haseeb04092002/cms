@@ -1,3 +1,10 @@
+<?php
+$assignedLectures = count($subject_class_assigns);
+foreach ($subject_class_assigns as $record) {
+    $lecturesPerWeek = $record->lecturesPerWeek;
+}
+?>
+
 <div class="p-4">
     <div class="container my-4">
 
@@ -324,6 +331,60 @@
                         </div>
 
                     </div>
+
+                    <div class="card shadow-sm border-0 mt-4">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold">
+                                <i class="bi bi-journal-bookmark-fill me-2 text-primary"></i>
+                                Assigned Classes & Subjects
+                            </h6>
+                            <a href="<?= site_url('Cms/assign_classes_subjects/') . $teacher->staffId ?>" class="navigator btn btn-sm btn-primary">Assign Classes and Subjects</a>
+                        </div>
+
+                        <div class="card-body">
+
+                            <div class="justify-content-start gap-2 d-flex align-items-center">
+                                <span class="badge bg-secondary fs-6 mb-2">Total Lectures Per Week = <?= $lecturesPerWeek ?></span>
+                                <span class="badge bg-success fs-6 mb-2">Total Free Lectures = <?= $lecturesPerWeek - $assignedLectures ?></span>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover align-middle text-center">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Class</th>
+                                            <th>Section</th>
+                                            <th>Subject</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+
+                                        <?php if (empty($subject_class_assigns)): ?>
+                                            <div class="d-block p-3 justify-content-center mx-auto text-center">
+                                                <h4>There are no subjects and class assigned</h4>
+                                                <a href="<?= site_url('Cms/assign_classes_subjects/') . $teacher->staffId ?>" class="navigator btn btn-primary">Assign Classes and Subjects</a>
+                                            </div>
+                                        <?php endif;
+                                        foreach ($subject_class_assigns as $record) :
+                                        ?>
+                                            <tr>
+                                                <td><?= $record->assignId ?></td>
+                                                <td><span class="fw-semibold"><?= $record->className ?></span></td>
+                                                <td><span class="badge bg-info"><?= $record->sectionName ?></span></td>
+                                                <td><span class="text-primary fw-bold"><?= $record->subjectName ?></span></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+
+
                 </div>
 
             </div>

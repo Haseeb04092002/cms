@@ -43,9 +43,32 @@ class Teacher extends MY_Controller
 		$UserRole = $this->session->userdata('user_role') ?? '';
 		$StationId = $this->session->userdata('station_id') ?? '';
 
+		$this->db->select('
+            tbl_class_subject_assignment.*,
+            tbl_staff.firstName, tbl_staff.lastName,
+            tbl_classes.className, tbl_classes.sectionName,
+            tbl_subjects.subjectName
+        ');
+        $this->db->from('tbl_class_subject_assignment');
+        $this->db->join('tbl_classes', 'tbl_class_subject_assignment.classId = tbl_classes.classId', 'left');
+        $this->db->join('tbl_staff', 'tbl_class_subject_assignment.teacherId = tbl_staff.staffId', 'left');
+        $this->db->join('tbl_subjects', 'tbl_class_subject_assignment.subjectId = tbl_subjects.subjectId', 'left');
+        $this->db->where('tbl_class_subject_assignment.stationId', $StationId);
+        $this->db->where('tbl_class_subject_assignment.teacherId', $staffId);
+        $this->db->where('tbl_class_subject_assignment.isDeleted', 0);
+
+        $subject_class_assigns = $this->db->get()->result();
+
 		$data = array();
 		$teacher = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->where('staffId', $staffId)->get('tbl_staff')->row();
 		$data['teacher'] = $teacher;
+		$data['subject_class_assigns'] = $subject_class_assigns;
+
+		// echo "<br>";
+		// echo "<pre>";
+		// // print_r($data['subject_class_assigns']);
+		// print_r($this->db->last_query());
+		// die();
 		$data['suggested_password'] = $this->generate_strong_password(6, 8);
 		$this->load->view('pages/teacher/dashboard', $data);
 	}
