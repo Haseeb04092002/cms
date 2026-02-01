@@ -70,6 +70,7 @@ class Login extends CI_Controller
                 'user_name'     => $check->username ?? '',
                 'user_email'    => $check->email ?? '',
                 'user_role'     => $userRole ?? 'Admin',
+                'user_role_id'  => $check->roleId ?? '',
                 'station_id'    => $check->stationId ?? '',
                 'last_activity' => time()
             ]);

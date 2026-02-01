@@ -43,3 +43,17 @@ $StationId = $this->session->userdata('station_id') ?? '';
     <!-- <img src="<?= base_url('assets/img/profile.jpg') ?>" alt="" class="profile" /> -->
   </div>
 </nav>
+
+<audio id="NotificationSound" src="<?= base_url('assets/sounds/notify.mp3') ?>" preload="auto"></audio>
+
+<script>
+
+  function NotificationSound() {
+    console.log('Playing notification sound');
+    const a = document.getElementById('NotificationSound');
+    if (a) {
+      a.currentTime = 0;
+      a.play().catch(() => {});
+    }
+  }
+</script>

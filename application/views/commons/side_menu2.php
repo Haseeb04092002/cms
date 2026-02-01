@@ -85,7 +85,7 @@ $UserRole = $this->session->userdata('user_role') ?? '';
             </li>
 
             <li class="<?= ($UserRole == 'Admin') ? 'd-block' : 'd-none' ?> item">
-                <a href="<?= site_url('Attendance/attendance') ?>" class="nav_link navigator side-menu-links">
+                <a href="<?= site_url('Attendance') ?>" class="nav_link navigator side-menu-links">
                     <span class="navlink_icon"><i class="bi bi-calendar-check"></i></span>
                     <span class="navlink">Attendance</span>
                 </a>
@@ -106,7 +106,7 @@ $UserRole = $this->session->userdata('user_role') ?? '';
             </li>
 
             <li class="<?= ($UserRole == 'Admin') ? 'd-block' : 'd-none' ?> item">
-                <a href="<?= site_url('Chatting/chats') ?>" class="nav_link navigator side-menu-links">
+                <a href="<?= site_url('Chatting') ?>" class="nav_link navigator side-menu-links">
                     <span class="navlink_icon"><i class="bi bi-chat-square-text"></i></span>
                     <span class="navlink">Chatting</span>
                 </a>
