@@ -23,7 +23,6 @@
 <meta name="twitter:description" content="Manage classes, students, attendance, grades with Schoolium school management platform.">
 <meta name="twitter:image" content="https://cms.itimium.com.pk/assets/images/og-image.png">
 
-<meta name="theme-color" content="#f68a0a">
 <meta name="msapplication-TileColor" content="#f68a0a">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -31,6 +30,8 @@
 <meta name="apple-mobile-web-app-title" content="Schoolium">
 
 <link rel="manifest" href="https://cms.itimium.com.pk/manifest.json">
+<meta name="theme-color" content="#f68a0a">
+
 <link rel="apple-touch-icon" sizes="192x192" href="https://cms.itimium.com.pk/assets/icons/icon-192x192.png">
 <link rel="apple-touch-icon" sizes="512x512" href="https://cms.itimium.com.pk/assets/icons/icon-512x512.png">
 
