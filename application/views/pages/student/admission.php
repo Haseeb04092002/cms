@@ -78,6 +78,32 @@
                                     </select>
                                 </div>
 
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">Batch Year</label>
+                                    <select class="form-select" name="batchYear" required>
+                                        <option value="">--Select--</option>
+                                        <?php
+                                        $currentYear = date('Y');
+                                        if (!empty($all_batch_year)): ?>
+                                            <?php foreach ($all_batch_year as $type): ?>
+
+                                                <?php
+                                                $selected =
+                                                    (!empty($student->batchYear) && $student->batchYear == $type)
+                                                    || (empty($student->batchYear) && $type == $currentYear)
+                                                    ? 'selected'
+                                                    : '';
+                                                ?>
+
+                                                <option value="<?= $type ?>" <?= $selected ?>>
+                                                    <?= $type ?>
+                                                </option>
+
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </select>
+                                </div>
+
                             </div>
                         </div>
 

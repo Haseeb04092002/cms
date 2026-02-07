@@ -5,30 +5,84 @@
         <h3 class="fw-bold">All Tasks</h3>
     </div>
 
-    <!-- Search Student Card -->
-    <div class="card mb-4">
-        <div class="card-header bg-white">
-            <h5 class="mb-0">Search Task</h5>
-        </div>
-        <div class="card-body">
-            <form id="FindStudentForm" data-parsley-validate>
-                <div class="row g-3">
+    <div class="card mb-3 border-dark">
+        <form id="taskSearchForm">
+            <div class="card-header p-1 ps-2">
+                <h6 class="mb-0">Search Tasks</h6>
+            </div>
+            <div class="card-body p-3">
+                <div class="row g-2 align-items-end">
 
-                    <div class="col-md-10">
-                        <input type="text" class="form-control"
-                            placeholder="Enter Task title, ID, or keywords"
-                            name="searchQuery"
-                            id="searchQuery"
-                            required>
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Task title</label>
+                        <input type="text"
+                            name="taskTitle"
+                            class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Assign Date</label>
+                        <input type="date"
+                            name="assignDate"
+                            class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label mb-1">Status</label>
+                        <input type="text"
+                            name="status"
+                            class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Student Name</label>
+                        <input type="text"
+                            name="studentName"
+                            class="form-control form-control-sm">
+                    </div>
+
+                    <!-- Class -->
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Class</label>
+                        <select class="form-select form-select-sm" name="class_id">
+                            <option value="">--Select--</option>
+                            <?php if (!empty($all_classes)): ?>
+                                <?php foreach ($all_classes as $type): ?>
+                                    <option value="<?= $type->classId ?>"
+                                        <?= (!empty($student->classId) && $student->classId == $type->classId) ? 'selected' : '' ?>>
+                                        <?= $type->className ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+
+                    <!-- Section -->
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Section</label>
+                        <select class="form-select form-select-sm" name="section_id">
+                            <option value="">--Select--</option>
+                            <?php if (!empty($all_classes)): ?>
+                                <?php foreach ($all_classes as $type): ?>
+                                    <option value="<?= $type->classId ?>"
+                                        <?= (!empty($student->classId) && $student->classId == $type->classId) ? 'selected' : '' ?>>
+                                        <?= $type->sectionName ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+
+                    <!-- Search Button -->
+                    <div class="col-md-1 text-end">
+                        <button type="submit" class="btn btn-dark btn-sm w-100">
+                            <i class="bi bi-search"></i>
+                        </button>
                     </div>
 
                 </div>
-
-                <button class="btn btn-primary mt-3" type="submit">Search</button>
-                <button class="btn btn-primary mt-3 ms-3" type="reset" id="resetBtn">Reset</button>
-
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 
 
@@ -48,12 +102,8 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="studentTableBody">
+                    <tbody id="tasksTableBody">
                         <?php
-                        // echo "<br>";
-                        // echo "<pre>";
-                        // print_r($all_students);
-                        // die();
                         foreach ($all_tasks as $record) :
                         ?>
                             <tr>
@@ -169,6 +219,121 @@
                         });
                     }
                 }
+            });
+        });
+
+        $('#taskSearchForm').off('submit').on('submit', function(e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+
+            Swal.fire({
+                title: 'Searching...',
+                text: 'Please wait',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            console.log("form data = ", formData);
+
+            $.ajax({
+                url: "<?= site_url('Tasks/find_task') ?>",
+                type: "POST",
+                data: formData,
+                dataType: "json",
+                contentType: false,
+                processData: false,
+
+                success: function(res) {
+
+                    Swal.close();
+
+                    if (res.status === true) {
+
+                        let html = '';
+
+                        $.each(res.data, function(i, record) {
+
+                            let addedOn = new Date(record.addedOn).toLocaleString('en-GB', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                hour12: true
+                            });
+
+                            html += `
+                                <tr>
+                                    <td>${record.taskId}</td>
+                                    <td>${record.taskTitle}</td>
+                                    <td>${addedOn}</td>
+                                    <td>${record.status}</td>
+                                    <td>${record.firstName} ${record.lastName}</td>
+                                    <td>${record.className} ${record.sectionName}</td>
+                                    <td>${record.student_education_type}</td>
+                                    <td>
+
+                                        <a class="btn btn-sm btn-info navigator"
+                                        href="<?= site_url('Tasks/view_edit_task/view/') ?>${record.taskId}/${record.studentId}/${record.classId}">
+                                            View
+                                        </a>
+
+                                        <a class="btn btn-sm btn-warning navigator"
+                                        href="<?= site_url('Tasks/view_edit_task/edit/') ?>${record.taskId}/${record.studentId}/${record.classId}">
+                                            Edit
+                                        </a>
+
+                                        <button type="button"
+                                                class="btn btn-sm btn-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal${record.taskId}">
+                                            Delete
+                                        </button>
+
+                                        <div class="modal fade"
+                                            id="deleteModal${record.taskId}"
+                                            tabindex="-1">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content">
+
+                                                    <div class="modal-header bg-light">
+                                                        <h5 class="modal-title">Confirm Delete</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+
+                                                    <form class="FormDeleteTask">
+                                                        <div class="modal-body">
+                                                            <p>Are you sure you want to delete this item ?</p>
+                                                            <input type="hidden" name="taskId" value="${record.taskId}">
+                                                            <div class="text-end">
+                                                                <button class="btn btn-danger BtnDeleteTask">Yes</button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </td>
+                                </tr>`
+                            ;
+                        });
+
+                        $('#tasksTableBody').html(html);
+
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'No Data',
+                            text: 'No tasks found'
+                        });
+                    }
+                }
+
             });
         });
 

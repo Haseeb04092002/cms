@@ -190,4 +190,48 @@ class Subject extends MY_Controller
         }
         exit(json_encode($Response));
     }
+
+    public function find_subject()
+	{
+		$Response['status']  = false;
+		$Response['message'] = "Some Error Occured. Try Again";
+
+		$stationId    = $this->session->userdata('station_id');
+
+		$subjectName  = $this->input->post('subjectName') ?? '';
+		$subjectCode  = $this->input->post('subjectCode') ?? '';
+		$description  = $this->input->post('description') ?? '';
+
+		if (empty($subjectName) && empty($subjectCode) && empty($description)) {
+			$Response['message'] = "Please select at least one filter.";
+			exit(json_encode($Response));
+		}
+
+		$this->db->select('*')->where('stationId', $stationId)->where('isDeleted', 0);
+		if (!empty($subjectName)) {
+        $this->db->where('subjectName', $subjectName);
+        }
+        if (!empty($subjectCode)) {
+        $this->db->where('subjectCode', $subjectCode);
+        }
+        if (!empty($description)) {
+        $this->db->where('description', $description);
+        }
+
+		$this->db->order_by('addedOn', 'DESC');
+
+		$subjects = $this->db->get('tbl_subjects')->result();
+		// echo "<br> all students = ".print_r($students, true);
+		// die();
+		if (empty($subjects)) {
+			$Response['message'] = "No subjects found.";
+			exit(json_encode($Response));
+		}
+
+		$Response['status']  = true;
+		$Response['data'] = $subjects;
+		$Response['message'] = "Subjects found successfully.";
+
+		exit(json_encode($Response));
+	}
 }

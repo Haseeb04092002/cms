@@ -124,18 +124,52 @@
         </div>
     </div>
 
-    <div class="card mb-3">
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-3">
-                    <label class="form-label">Search</label>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+    <div class="card mb-3 border-dark">
+        <form id="teacherSearchForm">
+            <div class="card-header p-1 ps-2">
+                <h6 class="mb-0">Search Teachers</h6>
+            </div>
+            <div class="card-body p-3">
+                <div class="row g-2 align-items-end">
+
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Teacher Name</label>
+                        <input type="text"
+                            name="teacherName"
+                            class="form-control form-control-sm">
                     </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Designation</label>
+                        <input type="text"
+                            name="designation"
+                            class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Department</label>
+                        <input type="text"
+                            name="department"
+                            class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Contact</label>
+                        <input type="text"
+                            name="contact"
+                            class="form-control form-control-sm">
+                    </div>
+
+                    <!-- Search Button -->
+                    <div class="col-md-1 text-end">
+                        <button type="submit" class="btn btn-dark btn-sm w-100">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+
                 </div>
             </div>
-        </div>
+        </form>
     </div>
 
     <div class="card">
@@ -155,7 +189,7 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="teachersTableBody">
                         <?php foreach ($all_teachers as $teacher) : ?>
                             <tr>
                                 <td><?= $teacher->staffId ?></td>
@@ -485,6 +519,260 @@
                             // $('.selectpicker').selectpicker();
                         });
                     }
+                }
+            });
+        });
+
+        $('#teacherSearchForm').off('submit').on('submit', function(e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+
+            Swal.fire({
+                title: 'Searching...',
+                text: 'Please wait',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.ajax({
+                url: "<?= site_url('Teacher/find_teacher') ?>",
+                type: "POST",
+                data: formData,
+                dataType: "json",
+                contentType: false,
+                processData: false,
+
+                success: function(res) {
+
+                    Swal.close();
+
+                    console.log(res.data);
+
+                    if (res.status === true) {
+
+                        let html = '';
+
+                        $.each(res.data, function(i, teacher) {
+
+                            html += `
+                                <tr>
+                                    <td>${teacher.staffId}</td>
+                                    <td>${teacher.firstName}</td>
+                                    <td>${teacher.designation}</td>
+                                    <td>${teacher.department}</td>
+                                    <td>${teacher.contactNo}</td>
+                                    <td>${teacher.email}</td>
+                                    <td>${teacher.joiningDate}</td>
+                                    <td>${teacher.salary}</td>
+                                    <td>
+
+                                        <a href="${base_url}Teacher/dashboard/${teacher.staffId}"
+                                        class="navigator btn btn-sm btn-primary">
+                                            View
+                                        </a>
+
+                                        <button type="button"
+                                            class="btn btn-sm btn-warning"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editModal${teacher.staffId}">
+                                            Edit
+                                        </button>
+
+                                        <button type="button"
+                                            class="btn btn-sm btn-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteModal${teacher.staffId}">
+                                            Delete
+                                        </button>
+
+                                        <!-- DELETE MODAL -->
+                                        <div class="modal fade"
+                                            id="deleteModal${teacher.staffId}"
+                                            tabindex="-1"
+                                            aria-hidden="true">
+
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content">
+
+                                                    <div class="modal-header bg-light">
+                                                        <h5 class="modal-title">Confirm Delete</h5>
+                                                        <button type="button"
+                                                            class="btn-close"
+                                                            data-bs-dismiss="modal"></button>
+                                                    </div>
+
+                                                    <form class="FormDeleteTeacher">
+                                                        <div class="modal-body">
+                                                            <p>Are you sure you want to delete this item ?</p>
+                                                            <input type="hidden"
+                                                                name="staffId"
+                                                                value="${teacher.staffId}">
+                                                            <div class="text-end">
+                                                                <button class="btn btn-danger BtnDeleteTeacher">
+                                                                    Yes
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- EDIT MODAL -->
+                                        <div class="modal fade"
+                                            id="editModal${teacher.staffId}"
+                                            tabindex="-1"
+                                            aria-hidden="true">
+
+                                            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                                                <div class="modal-content">
+
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Edit Teacher</h5>
+                                                        <button type="button"
+                                                            class="btn-close"
+                                                            data-bs-dismiss="modal"></button>
+                                                    </div>
+
+                                                    <form class="FormEditTeacher">
+                                                        <input type="hidden"
+                                                            name="staffId"
+                                                            value="${teacher.staffId}">
+
+                                                        <div class="modal-body">
+                                                            <div class="row g-3">
+
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">First Name</label>
+                                                                    <input type="text"
+                                                                        name="firstName"
+                                                                        class="form-control"
+                                                                        value="${teacher.firstName}"
+                                                                        required>
+                                                                </div>
+
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Last Name</label>
+                                                                    <input type="text"
+                                                                        name="lastName"
+                                                                        class="form-control"
+                                                                        value="${teacher.lastName}"
+                                                                        required>
+                                                                </div>
+
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Gender</label>
+                                                                    <select name="gender" class="form-select" required>
+                                                                        <option value="">Select Gender</option>
+                                                                        <option ${teacher.gender === 'Male' ? 'selected' : ''}>Male</option>
+                                                                        <option ${teacher.gender === 'Female' ? 'selected' : ''}>Female</option>
+                                                                        <option ${teacher.gender === 'Other' ? 'selected' : ''}>Other</option>
+                                                                    </select>
+                                                                </div>
+
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Designation</label>
+                                                                    <input type="text"
+                                                                        name="designation"
+                                                                        class="form-control"
+                                                                        value="${teacher.designation}"
+                                                                        required>
+                                                                </div>
+
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Department</label>
+                                                                    <input type="text"
+                                                                        name="department"
+                                                                        class="form-control"
+                                                                        value="${teacher.department}"
+                                                                        required>
+                                                                </div>
+
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Contact No</label>
+                                                                    <input type="tel"
+                                                                        name="contactNo"
+                                                                        class="form-control"
+                                                                        value="${teacher.contactNo}"
+                                                                        required>
+                                                                </div>
+
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Email</label>
+                                                                    <input type="email"
+                                                                        name="email"
+                                                                        class="form-control"
+                                                                        value="${teacher.email}"
+                                                                        required>
+                                                                </div>
+
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Joining Date</label>
+                                                                    <input type="date"
+                                                                        name="joiningDate"
+                                                                        class="form-control"
+                                                                        value="${teacher.joiningDate}"
+                                                                        required>
+                                                                </div>
+
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Salary</label>
+                                                                    <input type="number"
+                                                                        name="salary"
+                                                                        class="form-control"
+                                                                        value="${teacher.salary}"
+                                                                        required>
+                                                                </div>
+
+                                                                <div class="col-md-12">
+                                                                    <label class="form-label">Address</label>
+                                                                    <textarea name="address"
+                                                                        class="form-control"
+                                                                        rows="2"
+                                                                        required>${teacher.address}</textarea>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="modal-footer">
+                                                            <button type="button"
+                                                                class="btn btn-secondary"
+                                                                data-bs-dismiss="modal">
+                                                                Cancel
+                                                            </button>
+                                                            <button type="submit"
+                                                                class="btn btn-success BtnEditTeacher">
+                                                                Save Teacher
+                                                            </button>
+                                                        </div>
+                                                    </form>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </td>
+                                </tr>`;
+                        });
+
+                        $('#teacherTableBody').html(html);
+
+                    } else {
+
+                        Swal.fire({
+                            title: 'Error',
+                            text: res.message,
+                            icon: 'error',
+                            timer: 3000,
+                            showConfirmButton: true
+                        });
+                    }
+
                 }
             });
         });

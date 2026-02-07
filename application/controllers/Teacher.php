@@ -49,15 +49,15 @@ class Teacher extends MY_Controller
             tbl_classes.className, tbl_classes.sectionName,
             tbl_subjects.subjectName
         ');
-        $this->db->from('tbl_class_subject_assignment');
-        $this->db->join('tbl_classes', 'tbl_class_subject_assignment.classId = tbl_classes.classId', 'left');
-        $this->db->join('tbl_staff', 'tbl_class_subject_assignment.teacherId = tbl_staff.staffId', 'left');
-        $this->db->join('tbl_subjects', 'tbl_class_subject_assignment.subjectId = tbl_subjects.subjectId', 'left');
-        $this->db->where('tbl_class_subject_assignment.stationId', $StationId);
-        $this->db->where('tbl_class_subject_assignment.teacherId', $staffId);
-        $this->db->where('tbl_class_subject_assignment.isDeleted', 0);
+		$this->db->from('tbl_class_subject_assignment');
+		$this->db->join('tbl_classes', 'tbl_class_subject_assignment.classId = tbl_classes.classId', 'left');
+		$this->db->join('tbl_staff', 'tbl_class_subject_assignment.teacherId = tbl_staff.staffId', 'left');
+		$this->db->join('tbl_subjects', 'tbl_class_subject_assignment.subjectId = tbl_subjects.subjectId', 'left');
+		$this->db->where('tbl_class_subject_assignment.stationId', $StationId);
+		$this->db->where('tbl_class_subject_assignment.teacherId', $staffId);
+		$this->db->where('tbl_class_subject_assignment.isDeleted', 0);
 
-        $subject_class_assigns = $this->db->get()->result();
+		$subject_class_assigns = $this->db->get()->result();
 
 		$data = array();
 		$teacher = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->where('staffId', $staffId)->get('tbl_staff')->row();
@@ -246,6 +246,83 @@ class Teacher extends MY_Controller
 		$data['all_teachers'] = $teachers;
 		$this->load->view('pages/teacher/all_teachers', $data);
 	}
+
+
+	public function find_teacher()
+	{
+		$Response['status']  = false;
+		$Response['message'] = "Some Error Occured. Try Again";
+
+		$stationId    = $this->session->userdata('station_id');
+
+		$teacherName  = $this->input->post('teacherName') ?? '';
+		$designation  = $this->input->post('designation') ?? '';
+		$department  = $this->input->post('department') ?? '';
+		$contact  = $this->input->post('contact') ?? '';
+
+		// echo "<br>teacherName = " . $teacherName;
+		// echo "<br>designation = " . $designation;
+		// echo "<br>department = " . $department;
+		// echo "<br>contact = " . $contact;
+		// die();
+
+		if (
+			empty($teacherName) &&
+			empty($designation) &&
+			empty($department) &&
+			empty($contact)
+		) {
+			$Response['status']  = false;
+			$Response['message'] = "Please select at least one filter.";
+			exit(json_encode($Response));
+		}
+
+		$this->db->from('tbl_staff');
+		$this->db->where('stationId', $stationId);
+		$this->db->where('isDeleted', 0);
+
+		/* ===== NAME SEARCH (FIRST OR LAST) ===== */
+		if (!empty($teacherName)) {
+			$this->db->group_start();
+			$this->db->like('firstName', $teacherName);
+			$this->db->or_like('lastName', $teacherName);
+			$this->db->group_end();
+		}
+
+		/* ===== OTHER FILTERS ===== */
+		if (!empty($designation)) {
+			$this->db->where('designation', $designation);
+		}
+
+		if (!empty($department)) {
+			$this->db->where('department', $department);
+		}
+
+		if (!empty($contact)) {
+			$this->db->like('contactNo', $contact);
+		}
+
+		$this->db->order_by('addedOn', 'DESC');
+
+		$query   = $this->db->get();
+		$teachers = $query->result();
+
+		/* ===== DEBUG (OPTIONAL) ===== */
+		// echo $this->db->last_query(); die();
+
+		if (empty($teachers)) {
+			$Response['status']  = false;
+			$Response['message'] = "No teachers found.";
+			exit(json_encode($Response));
+		}
+
+		$Response['status']  = true;
+		$Response['data']    = $teachers;
+		$Response['message'] = "Teachers found successfully.";
+
+		exit(json_encode($Response));
+	}
+
 
 	public function add_teacher()
 	{

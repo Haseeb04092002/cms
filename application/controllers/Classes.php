@@ -3,30 +3,76 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Classes extends MY_Controller
 {
-    
-	public function all_classes()
-	{
-		$UserId = '';
-		$UserName = '';
-		$UserEmail = '';
-		$UserRole = '';
-		$StationId = '';
-		$UserId = $this->session->userdata('user_id') ?? '';
-		$UserName = $this->session->userdata('user_name') ?? '';
-		$UserEmail = $this->session->userdata('user_email') ?? '';
-		$UserRole = $this->session->userdata('user_role') ?? '';
-		$StationId = $this->session->userdata('station_id') ?? '';
 
-		$all_classes = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->order_by('addedOn', 'DESC')->get('tbl_classes')->result();
-		$data['all_classes'] = $all_classes;
-		$this->load->view('pages/class/all_classes', $data);
-	}
+    public function all_classes()
+    {
+        $UserId = '';
+        $UserName = '';
+        $UserEmail = '';
+        $UserRole = '';
+        $StationId = '';
+        $UserId = $this->session->userdata('user_id') ?? '';
+        $UserName = $this->session->userdata('user_name') ?? '';
+        $UserEmail = $this->session->userdata('user_email') ?? '';
+        $UserRole = $this->session->userdata('user_role') ?? '';
+        $StationId = $this->session->userdata('station_id') ?? '';
 
-	public function all_sections()
-	{
-		$this->load->view('pages/class/all_sections');
-	}
-    
+        // $all_classes = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->order_by('addedOn', 'DESC')->get('tbl_classes')->result();
+        $this->db->select('
+            c.classId,
+            c.className,
+            c.sectionName,
+            COUNT(DISTINCT s.studentId) AS total_students,
+
+            st.staffId AS head_teacher_id,
+            CONCAT(st.firstName, " ", st.lastName) AS head_teacher_name
+        ');
+
+        $this->db->from('tbl_classes c');
+
+        $this->db->join(
+            'tbl_students s',
+            's.classId = c.classId 
+         AND s.stationId = c.stationId
+         AND s.isDeleted IS NULL',
+            'left'
+        );
+
+        $this->db->join(
+            'tbl_class_subject_assignment a',
+            'a.classId = c.classId 
+         AND a.stationId = c.stationId',
+            'left'
+        );
+
+        $this->db->join(
+            'tbl_staff st',
+            'st.staffId = a.headClassId
+         AND st.stationId = c.stationId',
+            'left'
+        );
+
+        if (!empty($class_name)) {
+            $this->db->where('c.classId', $class_name);
+        }
+        if (!empty($section_name)) {
+            $this->db->where('c.classId', $section_name);
+        }
+
+        $this->db->where('c.stationId', $StationId);
+        $this->db->where('c.isDeleted', 0);
+        $this->db->group_by('c.classId');
+        $this->db->order_by('c.addedOn', 'DESC');
+        $all_classes = $this->db->get()->result();
+        $data['all_classes'] = $all_classes;
+        $this->load->view('pages/class/all_classes', $data);
+    }
+
+    public function all_sections()
+    {
+        $this->load->view('pages/class/all_sections');
+    }
+
     public function add_class()
     {
         $UserId = '';
@@ -132,6 +178,84 @@ class Classes extends MY_Controller
         }
         exit(json_encode($Response));
     }
+
+
+    public function find_class()
+    {
+        $Response['status']  = false;
+        $Response['message'] = "Some Error Occured. Try Again";
+
+        $station_id     = $this->session->userdata('station_id');
+
+        $class_name     = $this->input->post('class_id') ?? '';
+        $section_name   = $this->input->post('section_id') ?? '';
+
+        if (empty($class_name) && empty($section_name)) {
+            $Response['message'] = "Please select at least one filter.";
+            exit(json_encode($Response));
+        }
+
+        $this->db->select('
+            c.classId,
+            c.className,
+            c.sectionName,
+            COUNT(DISTINCT s.studentId) AS total_students,
+
+            st.staffId AS head_teacher_id,
+            CONCAT(st.firstName, " ", st.lastName) AS head_teacher_name
+        ');
+
+        $this->db->from('tbl_classes c');
+
+        $this->db->join(
+            'tbl_students s',
+            's.classId = c.classId 
+         AND s.stationId = c.stationId
+         AND s.isDeleted IS NULL',
+            'left'
+        );
+
+        $this->db->join(
+            'tbl_class_subject_assignment a',
+            'a.classId = c.classId 
+         AND a.stationId = c.stationId',
+            'left'
+        );
+
+        $this->db->join(
+            'tbl_staff st',
+            'st.staffId = a.headClassId
+         AND st.stationId = c.stationId',
+            'left'
+        );
+
+        if (!empty($class_name)) {
+            $this->db->where('c.classId', $class_name);
+        }
+        if (!empty($section_name)) {
+            $this->db->where('c.classId', $section_name);
+        }
+
+        $this->db->where('c.stationId', $station_id);
+        $this->db->where('c.isDeleted', 0);
+        $this->db->group_by('c.classId');
+        $this->db->order_by('c.addedOn', 'DESC');
+        $classes = $this->db->get()->result();
+        // echo "<br> all students = ".print_r($students, true);
+        // die();
+        if (empty($classes)) {
+            $Response['message'] = "No students found matching the criteria.";
+            exit(json_encode($Response));
+        }
+
+        $Response['status']  = true;
+        $Response['data'] = $classes;
+        $Response['message'] = "Classes found successfully.";
+
+        exit(json_encode($Response));
+    }
+
+
 
     public function edit_class()
     {

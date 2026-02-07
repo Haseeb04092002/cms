@@ -5,18 +5,18 @@
         <h3 class="fw-bold">Fee Collection / Payment</h3>
     </div>
 
-    <!-- Search Student Card -->
-    <div class="card mb-4">
-        <div class="card-header bg-white">
-            <h5 class="mb-0">Search Student</h5>
-        </div>
-        <div class="card-body">
-            <form id="FindStudentForm" data-parsley-validate>
-                <div class="row g-3">
+    <div class="card mb-3 border-dark">
+        <form id="studentSearchForm">
+            <div class="card-header p-1 ps-2">
+                <h6 class="mb-0">Search Students</h6>
+            </div>
+            <div class="card-body p-3">
+                <div class="row g-2 align-items-end">
 
-                    <div class="col-md-4">
-                        <label class="form-label">Education Type</label>
-                        <select class="form-select" name="education_type" required data-parsley-required-message="Education Type is required">
+                    <!-- Education Type -->
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Education Type</label>
+                        <select class="form-select form-select-sm" name="education_type">
                             <option value="">-- Select --</option>
 
                             <?php if (!empty($all_education_type)): ?>
@@ -31,33 +31,79 @@
                         </select>
                     </div>
 
-                    <div class="col-md-4">
-                        <label class="form-label">Student Name</label>
-                        <input type="text" class="form-control" name="student_name" data-parsley-required-message="Student Name is required">
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label">Class</label>
-                        <select class="form-select" name="class_section" required data-parsley-required-message="Class & Section is required">
+                    <!-- Class -->
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Class</label>
+                        <select class="form-select form-select-sm" name="class_id">
                             <option value="">--Select--</option>
                             <?php if (!empty($all_classes)): ?>
                                 <?php foreach ($all_classes as $type): ?>
                                     <option value="<?= $type->classId ?>"
                                         <?= (!empty($student->classId) && $student->classId == $type->classId) ? 'selected' : '' ?>>
-                                        <?= $type->className ?> <?= $type->sectionName ?>
+                                        <?= $type->className ?>
                                     </option>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </select>
                     </div>
 
-                </div>
-                
-                <button class="btn btn-primary mt-3" type="submit">Search</button>
-                <button class="btn btn-primary mt-3 ms-3" type="reset" id="resetBtn">Reset</button>
+                    <!-- Section -->
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Section</label>
+                        <select class="form-select form-select-sm" name="section_id">
+                            <option value="">--Select--</option>
+                            <?php if (!empty($all_classes)): ?>
+                                <?php foreach ($all_classes as $type): ?>
+                                    <option value="<?= $type->classId ?>"
+                                        <?= (!empty($student->classId) && $student->classId == $type->classId) ? 'selected' : '' ?>>
+                                        <?= $type->sectionName ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
 
-            </form>
-        </div>
+                    <!-- Student Name -->
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Student Name</label>
+                        <input type="text"
+                            name="student_name"
+                            class="form-control form-control-sm"
+                            placeholder="Type student name">
+                    </div>
+
+                    <!-- Batch Year -->
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Batch Year</label>
+                        <select class="form-select form-select-sm" name="batchYear">
+                            <option value="">--Select--</option>
+                            <?php
+                            if (!empty($all_batch_year)): ?>
+                                <?php foreach ($all_batch_year as $type): ?>
+                                    <?php
+                                    $selected =
+                                        (!empty($student->batchYear) && $student->batchYear == $type)
+                                        ? 'selected'
+                                        : '';
+                                    ?>
+                                    <option value="<?= $type ?>" <?= $selected ?>>
+                                        <?= $type ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+
+                    <!-- Search Button -->
+                    <div class="col-md-1 text-end">
+                        <button type="submit" class="btn btn-dark btn-sm w-100">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </form>
     </div>
 
 
@@ -68,17 +114,17 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Student ID</th>
-                            <th>Image</th>
+                            <!-- <th>Image</th> -->
                             <th>Admission No</th>
                             <th>Admission Date</th>
                             <th>Education Type</th>
                             <th>Name</th>
                             <th>Class</th>
-                            <th>Status</th>
+                            <!-- <th>Status</th> -->
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="studentTableBody">
+                    <tbody id="studentsTableBody">
                         <?php
                         // echo "<br>";
                         // echo "<pre>";
@@ -88,7 +134,7 @@
                         ?>
                             <tr>
                                 <td><?= $record->studentId ?></td>
-                                <td>
+                                <!-- <td>
                                     <?php if (!empty($record->documentPath)): ?>
                                         <img src="<?= base_url($record->documentPath); ?>"
                                             alt="Profile Image"
@@ -99,24 +145,18 @@
                                             class="img-thumbnail rounded-circle"
                                             width="75">
                                     <?php endif; ?>
-                                </td>
+                                </td> -->
                                 <td><?= $record->admissionNo ?></td>
-                                <td><?= date('d M Y g:i A', strtotime($record->addedOn)) ?></td>
+                                <td><?= date('d M Y', strtotime($record->addedOn)) ?></td>
                                 <td><?= $record->student_education_type ?></td>
                                 <td><?= $record->firstName ?> <?= $record->lastName ?></td>
                                 <td><?= $record->className ?> <?= $record->sectionName ?></td>
-                                <td><span class="badge bg-warning text-dark"><?= $record->status ?></span></td>
+                                <!-- <td><span class="badge bg-warning text-dark"><?= $record->status ?></span></td> -->
 
                                 <td>
                                     <div class="d-flex gap-2">
 
-                                        <!-- Controls Dropdown -->
-                                        <div class="position-static">
-                                            <button class="btn btn-sm btn-info"
-                                                type="button" data-bs-toggle="modal" data-bs-target="#feeModal<?= $record->studentId ?>">
-                                                Fee Management
-                                            </button>
-                                        </div>
+                                        <a class="btn btn-info" type="button" data-bs-toggle="modal" data-bs-target="#feeModal<?= $record->studentId ?>">Fee</a>
 
                                         <!-- Fee Modal -->
                                         <div class="modal fade" id="feeModal<?= $record->studentId ?>" tabindex="-1">
@@ -162,6 +202,7 @@
                                                                 $fees = $this->db
                                                                     ->where('education_type', $record->student_education_type)
                                                                     ->where('stationId', $record->stationId)
+                                                                    ->where('studentId', $record->studentId)
                                                                     ->where('classId', $record->classId)
                                                                     ->where('feeType', $type)
                                                                     ->get('tbl_fees')
@@ -370,136 +411,98 @@
 </div>
 
 <script>
-$(document).ready(function () {
+    $(document).ready(function() {
 
-    $('.FormCollectFee').parsley();
+        $('.FormCollectFee').parsley();
 
-    // remove previous handlers before binding
-    $(document).off('submit', '.FormCollectFee');
-    // submit handler
-    $(document).on('submit', '.FormCollectFee', function(e) {
-        e.preventDefault();
+        // remove previous handlers before binding
+        $(document).off('submit', '.FormCollectFee');
+        // submit handler
+        $(document).on('submit', '.FormCollectFee', function(e) {
+            e.preventDefault();
 
-        let form = $(this);
+            let form = $(this);
 
-        if (!form.parsley().isValid()) {
-            return;
-        }
-
-        $.ajax({
-            url: "<?= site_url('Fee/collect_fee') ?>",
-            type: "POST",
-            data: form.serialize(),
-            dataType: "json",
-            cache: false,
-            success: function(response) {
-
-                // close only current modal
-                let modalEl = form.closest('.modal');
-                let modal = bootstrap.Modal.getInstance(modalEl[0]);
-                if (modal) modal.hide();
-
-                Swal.fire({
-                    title: response.status ? 'Success' : 'Error',
-                    text: response.message,
-                    icon: response.status ? 'success' : 'error',
-                    timer: 3000,
-                    showConfirmButton: true
-                });
-
-                if (response.status) {
-                    $("#pageContent").load("<?= base_url('Cms/fee_collection') ?>");
-                }
+            if (!form.parsley().isValid()) {
+                return;
             }
-        });
-    });
 
-    $('#FindStudentForm').parsley();
+            $.ajax({
+                url: "<?= site_url('Fee/collect_fee') ?>",
+                type: "POST",
+                data: form.serialize(),
+                dataType: "json",
+                cache: false,
+                success: function(response) {
 
-    $(document).on('click', '#resetBtn', function () {
-        $("#pageContent").load("<?= base_url('Cms/fee_collection') ?>");
-    });
+                    // close only current modal
+                    let modalEl = form.closest('.modal');
+                    let modal = bootstrap.Modal.getInstance(modalEl[0]);
+                    if (modal) modal.hide();
 
-    $(document).on('submit', '#FindStudentForm', function (e) {
-        e.preventDefault();
+                    Swal.fire({
+                        title: response.status ? 'Success' : 'Error',
+                        text: response.message,
+                        icon: response.status ? 'success' : 'error',
+                        timer: 3000,
+                        showConfirmButton: true
+                    });
 
-        let form = $(this);
-        if (!form.parsley().isValid()) return;
-
-        $.ajax({
-            url: "<?= site_url('Cms/find_student') ?>",
-            type: "POST",
-            data: form.serialize(),
-            dataType: "json",
-
-            beforeSend: function () {
-                $('#studentTableBody').html(
-                    '<tr><td colspan="9" class="text-center">Loading...</td></tr>'
-                );
-            },
-
-            success: function (response) {
-
-                if (!response.status || response.data.length === 0) {
-                    $('#studentTableBody').html(
-                        '<tr><td colspan="9" class="text-center text-muted">No students found</td></tr>'
-                    );
-                    return;
+                    if (response.status) {
+                        $("#pageContent").load("<?= base_url('Cms/fee_collection') ?>");
+                    }
                 }
-
-                let rows = '';
-
-                response.data.forEach(function (r) {
-
-                    let img = r.documentPath
-                        ? "<?= base_url() ?>" + r.documentPath
-                        : "<?= base_url('assets/images/default-avatar.png') ?>";
-
-                    let date = new Date(r.addedOn).toLocaleString();
-
-                    rows += `
-                        <tr>
-                            <td>${r.studentId}</td>
-
-                            <td>
-                                <img src="${img}"
-                                     class="img-thumbnail rounded-circle"
-                                     width="70">
-                            </td>
-
-                            <td>${r.admissionNo}</td>
-                            <td>${date}</td>
-                            <td>${r.student_education_type}</td>
-                            <td>${r.firstName} ${r.lastName}</td>
-                            <td>${r.className} ${r.sectionName}</td>
-
-                            <td>
-                                <span class="badge bg-warning text-dark">
-                                    ${r.status}
-                                </span>
-                            </td>
-
-                            <td>
-                                <button class="btn btn-sm btn-info">
-                                    Fee Management
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-
-                $('#studentTableBody').html(rows);
-            },
-
-            error: function () {
-                $('#studentTableBody').html(
-                    '<tr><td colspan="9" class="text-danger text-center">Server Error</td></tr>'
-                );
-            }
+            });
         });
-    });
 
-});
+        $('#FindStudentForm').parsley();
+
+        $(document).on('click', '#resetBtn', function() {
+            $("#pageContent").load("<?= base_url('Cms/fee_collection') ?>");
+        });
+
+        $('#studentSearchForm').off('submit').on('submit', function(e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+
+            Swal.fire({
+                title: 'Searching...',
+                text: 'Please wait',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            console.log("form data = ", formData);
+
+            $.ajax({
+                url: "<?= site_url('Student/find_student/fee_collection') ?>",
+                type: "POST",
+                data: formData,
+                dataType: "json",
+                contentType: false,
+                processData: false,
+
+                success: function(res) {
+
+                    Swal.close();
+
+                    if (res.status === true) {
+
+                        $('#studentsTableBody').html(res.html);
+
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'No Data',
+                            text: 'No students found'
+                        });
+                    }
+                }
+            });
+        });
+
+    });
 </script>
-
-

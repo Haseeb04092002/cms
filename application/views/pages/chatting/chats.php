@@ -8,7 +8,7 @@
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white">
                     <div class="fw-bold">Chats</div>
-                    <input class="form-control form-control-sm mt-2" placeholder="Search user">
+                    <input class="form-control form-control-sm mt-2" id="chatSearch" placeholder="Search user">
                 </div>
 
                 <div class="list-group list-group-flush"
@@ -73,60 +73,187 @@
 </div>
 
 <script>
-    const USER_ID = <?= (int)$this->session->userdata('user_id') ?>;
-    const base_url = "<?= base_url() ?>";
+    // document.addEventListener("DOMContentLoaded", function(event) {
+        console.log("DOM fully loaded and parsed");
+        const USER_ID = <?= (int)$this->session->userdata('user_id') ?>;
+        const base_url = "<?= base_url() ?>";
+        let chatInterval = null;
 
-    // let currentChatUserId = null;
+        startChatInterval();
 
-    function formatDateTime(dt) {
-        if (!dt) return '';
+        function startChatInterval() {
+            if (chatInterval !== null) return; // already running
 
-        const d = new Date(dt.replace(' ', 'T')); // handles "YYYY-MM-DD HH:MM:SS"
+            chatInterval = setInterval(() => {
 
-        const optionsDate = {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric'
-        };
-        const optionsTime = {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true
-        };
+                const receiverId = document.getElementById('currentReceiverId').value;
 
-        const datePart = d.toLocaleDateString('en-GB', optionsDate); // 15 Sep 2020
-        const timePart = d.toLocaleTimeString('en-US', optionsTime).toLowerCase(); // 2:15 pm
+                if (receiverId) {
+                    const receiverRoleId = document.getElementById('currentReceiverRoleId').value;
 
-        return `${datePart} · ${timePart}`;
-    }
+                    $.get(base_url + 'Chatting/open_chat/' + receiverId + '/' + receiverRoleId, function(res) {
+
+                        let data = JSON.parse(res);
+                        let box = document.getElementById('chatBox');
+                        let old = box.innerHTML;
+                        let html = '';
+
+                        data.forEach(m => {
+
+                            if (parseInt(m.senderId) === parseInt(USER_ID)) {
+                                html += `
+                        <div class="d-flex justify-content-end mb-3">
+                            <div class="bg-primary text-white rounded-3 p-3 shadow-sm"
+                                style="max-width:75%; border-top-right-radius:0;">
+                                <div class="mb-1">
+                                    ${escapeHtml(m.messageText)}
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <small class="text-white-50">
+                                        ${formatDateTime(m.addedOn)}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>`;
+                            } else {
+                                html += `
+                        <div class="d-flex mb-3">
+                            <div class="me-2">
+                                <i class="bi bi-person-circle fs-3 text-secondary"></i>
+                            </div>
+                            <div class="bg-white border rounded-3 p-3 shadow-sm"
+                                style="max-width:75%; border-top-left-radius:0;">
+                                <div class="mb-1">
+                                    ${escapeHtml(m.messageText)}
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <small class="text-muted">
+                                        ${formatDateTime(m.addedOn)}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>`;
+                            }
+
+                        });
+
+                        if (old !== html) {
+                            box.innerHTML = html;
+                            box.scrollTop = box.scrollHeight;
+                        }
+                    });
+                }
+
+                $.get(base_url + 'Chatting/poll_updates', function(res) {
+
+                    let data = JSON.parse(res);
+
+                    data.forEach(u => {
+
+                        let senderId = u.senderId;
+                        let total = parseInt(u.total);
+
+                        let badge = document.getElementById('badge_' + senderId);
+                        let card = document.getElementById('chat_user_' + senderId);
+
+                        if (badge) {
+                            badge.innerText = total;
+                            badge.style.display = total > 0 ? 'inline-block' : 'none';
+                        }
+
+                        if (card && total > 0) {
+                            NotificationSound();
+                            document.getElementById('chatList').prepend(card);
+                        }
+                    });
+                });
+
+                refreshChatList();
+
+            }, 2000);
+        }
+
+        function stopChatInterval() {
+            if (chatInterval !== null) {
+                clearInterval(chatInterval);
+                chatInterval = null;
+            }
+        }
 
 
-    function openChat(uid, roleId, name, roleName) {
 
-        document.getElementById('msgInput').value = "";
+        document.getElementById('chatSearch').addEventListener('input', function() {
 
-        document.getElementById('currentReceiverId').value = uid;
-        document.getElementById('currentReceiverRoleId').value = roleId;
+            let keyword = this.value.toLowerCase().trim();
 
-        console.log('currentReceiverId = ' + uid);
-        console.log('currentReceiverRoleId = ' + roleId);
-        console.log('senderid = ' + USER_ID);
+            if (keyword.length > 0) {
+                stopChatInterval(); // ⏸ pause polling
+            } else {
+                startChatInterval(); // ▶ resume polling
+            }
 
-        document.getElementById('chatUserName').innerText = name;
-        // document.getElementById('chatUserId').innerText = uid;
-        document.getElementById('chatUserType').innerText = roleName;
+            document.querySelectorAll('#chatList a.list-group-item').forEach(item => {
 
-        $.get(base_url + 'Chatting/open_chat/' + uid + '/' + roleId, function(res) {
+                let name = item.querySelector('.fw-semibold')
+                    .childNodes[0].nodeValue
+                    .toLowerCase();
 
-            let data = JSON.parse(res);
-            let box = document.getElementById('chatBox');
-            box.innerHTML = '';
+                item.style.display = name.includes(keyword) ? '' : 'none';
+            });
+        });
 
-            data.forEach(m => {
 
-                // outgoing
-                if (parseInt(m.senderId) === parseInt(USER_ID)) {
-                    box.innerHTML += `
+        // let currentChatUserId = null;
+
+        function formatDateTime(dt) {
+            if (!dt) return '';
+
+            const d = new Date(dt.replace(' ', 'T')); // handles "YYYY-MM-DD HH:MM:SS"
+
+            const optionsDate = {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            };
+            const optionsTime = {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            };
+
+            const datePart = d.toLocaleDateString('en-GB', optionsDate); // 15 Sep 2020
+            const timePart = d.toLocaleTimeString('en-US', optionsTime).toLowerCase(); // 2:15 pm
+
+            return `${datePart} · ${timePart}`;
+        }
+
+
+        function openChat(uid, roleId, name, roleName) {
+
+            document.getElementById('msgInput').value = "";
+
+            document.getElementById('currentReceiverId').value = uid;
+            document.getElementById('currentReceiverRoleId').value = roleId;
+
+            console.log('currentReceiverId = ' + uid);
+            console.log('currentReceiverRoleId = ' + roleId);
+            console.log('senderid = ' + USER_ID);
+
+            document.getElementById('chatUserName').innerText = name;
+            // document.getElementById('chatUserId').innerText = uid;
+            document.getElementById('chatUserType').innerText = roleName;
+
+            $.get(base_url + 'Chatting/open_chat/' + uid + '/' + roleId, function(res) {
+
+                let data = JSON.parse(res);
+                let box = document.getElementById('chatBox');
+                box.innerHTML = '';
+
+                data.forEach(m => {
+
+                    // outgoing
+                    if (parseInt(m.senderId) === parseInt(USER_ID)) {
+                        box.innerHTML += `
                     <div class="d-flex justify-content-end mb-3">
                         <div class="bg-primary text-white rounded-3 p-3 shadow-sm"
                             style="max-width:75%; border-top-right-radius:0;">
@@ -142,11 +269,11 @@
                             </div>
                         </div>
                     </div>`;
-                }
+                    }
 
-                // incoming
-                else {
-                    box.innerHTML += `
+                    // incoming
+                    else {
+                        box.innerHTML += `
                     <div class="d-flex mb-3">
                         <div class="me-2">
                             <i class="bi bi-person-circle fs-3 text-secondary"></i>
@@ -166,46 +293,46 @@
                             </div>
                         </div>
                     </div>`;
-                }
+                    }
 
+                });
+
+                box.scrollTop = box.scrollHeight;
+
+                let badge = document.getElementById('badge_' + uid);
+                if (badge) {
+                    badge.style.display = 'none';
+                    badge.innerText = 0;
+                }
+                refreshChatList();
             });
+        }
 
-            box.scrollTop = box.scrollHeight;
+        function refreshChatList() {
+            $.ajax({
+                url: "<?= site_url('Chatting/chats') ?>",
+                type: "GET",
+                dataType: "json",
+                success: function(data) {
 
-            let badge = document.getElementById('badge_' + uid);
-            if (badge) {
-                badge.style.display = 'none';
-                badge.innerText = 0;
-            }
-            refreshChatList();
-        });
-    }
+                    console.log(data);
 
-    function refreshChatList() {
-        $.ajax({
-            url: "<?= site_url('Chatting/chats') ?>",
-            type: "GET",
-            dataType: "json",
-            success: function(data) {
+                    let list = data.chat_users; // 👈 FIX
 
-                console.log(data);
+                    if (!Array.isArray(list)) {
+                        console.error('Chat list is not array:', data);
+                        return;
+                    }
 
-                let list = data.chat_users; // 👈 FIX
+                    let html = '';
 
-                if (!Array.isArray(list)) {
-                    console.error('Chat list is not array:', data);
-                    return;
-                }
+                    list.forEach(u => {
 
-                let html = '';
+                        let activeClass = u.unread_count > 0 ? 'active' : '';
+                        let badgeStyle = u.unread_count > 0 ? 'display:block' : 'display:none';
+                        let lastMsg = u.last_message ? escapeHtml(u.last_message) : 'Start a new chat';
 
-                list.forEach(u => {
-
-                    let activeClass = u.unread_count > 0 ? 'active' : '';
-                    let badgeStyle = u.unread_count > 0 ? 'display:block' : 'display:none';
-                    let lastMsg = u.last_message ? escapeHtml(u.last_message) : 'Start a new chat';
-
-                    html += `
+                        html += `
                     
                 <a href="javascript:void(0)"
                     onclick="openChat(${u.profile_id}, ${u.roleId}, '${escapeHtml(u.name)}', '${escapeHtml(u.profile_type)}')"
@@ -233,65 +360,65 @@
                         </span>
                     </div>
                 </a>`;
-                });
-
-                document.getElementById('chatList').innerHTML = html;
-            },
-            error: function(xhr) {
-                console.error('Chat list JSON error:', xhr.responseText);
-            }
-        });
-    }
-
-
-    $(document).off('submit', '#chatForm').on('submit', '#chatForm', function(e) {
-        e.preventDefault();
-
-        let form = $(this);
-
-        $.ajax({
-            url: "<?= site_url('Chatting/send_message') ?>",
-            type: "POST",
-            data: new FormData(this),
-            dataType: "json",
-            processData: false,
-            contentType: false,
-            cache: false,
-            success: function(response) {
-
-                if (response.status === true) {
-                    NotificationSound();
-                    openChat(parseInt(receiverId), document.getElementById('currentReceiverRoleId').value, document.getElementById('chatUserName').innerText);
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: response.message
                     });
-                }
 
-            }
+                    document.getElementById('chatList').innerHTML = html;
+                },
+                error: function(xhr) {
+                    console.error('Chat list JSON error:', xhr.responseText);
+                }
+            });
+        }
+
+
+        $(document).off('submit', '#chatForm').on('submit', '#chatForm', function(e) {
+            e.preventDefault();
+
+            let form = $(this);
+
+            $.ajax({
+                url: "<?= site_url('Chatting/send_message') ?>",
+                type: "POST",
+                data: new FormData(this),
+                dataType: "json",
+                processData: false,
+                contentType: false,
+                cache: false,
+                success: function(response) {
+
+                    if (response.status === true) {
+                        NotificationSound();
+                        openChat(parseInt(receiverId), document.getElementById('currentReceiverRoleId').value, document.getElementById('chatUserName').innerText);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message
+                        });
+                    }
+
+                }
+            });
+
+            refreshChatList();
         });
 
-        refreshChatList();
-    });
+        setInterval(() => {
 
-    setInterval(() => {
+            const receiverId = document.getElementById('currentReceiverId').value;
 
-        const receiverId = document.getElementById('currentReceiverId').value;
+            if (receiverId) {
+                const receiverRoleId = document.getElementById('currentReceiverRoleId').value;
+                $.get(base_url + 'Chatting/open_chat/' + receiverId + '/' + receiverRoleId, function(res) {
 
-        if (receiverId) {
-            const receiverRoleId = document.getElementById('currentReceiverRoleId').value;
-            $.get(base_url + 'Chatting/open_chat/' + receiverId + '/' + receiverRoleId, function(res) {
+                    let data = JSON.parse(res);
+                    let box = document.getElementById('chatBox');
+                    let old = box.innerHTML;
+                    let html = '';
 
-                let data = JSON.parse(res);
-                let box = document.getElementById('chatBox');
-                let old = box.innerHTML;
-                let html = '';
-
-                data.forEach(m => {
-                    if (parseInt(m.senderId) === parseInt(USER_ID)) {
-                        html += `
+                    data.forEach(m => {
+                        if (parseInt(m.senderId) === parseInt(USER_ID)) {
+                            html += `
                         <div class="d-flex justify-content-end mb-3">
                         <div class="bg-primary text-white rounded-3 p-3 shadow-sm"
                             style="max-width:75%; border-top-right-radius:0;">
@@ -308,8 +435,8 @@
                         </div>
                     </div>
                     `;
-                    } else {
-                        html += `
+                        } else {
+                            html += `
                         <div class="d-flex mb-3">
                         <div class="me-2">
                             <i class="bi bi-person-circle fs-3 text-secondary"></i>
@@ -330,56 +457,58 @@
                         </div>
                     </div>
                     `;
+                        }
+
+
+                    });
+
+                    if (old !== html) {
+                        box.innerHTML = html;
+                        box.scrollTop = box.scrollHeight;
+                    }
+                });
+            }
+
+            $.get(base_url + 'Chatting/poll_updates', function(res) {
+                let data = JSON.parse(res);
+
+                data.forEach(u => {
+
+                    let senderId = u.senderId;
+                    let total = parseInt(u.total);
+
+                    let badge = document.getElementById('badge_' + senderId);
+                    let card = document.getElementById('chat_user_' + senderId);
+
+                    if (badge) {
+                        badge.innerText = total;
+                        badge.style.display = total > 0 ? 'inline-block' : 'none';
                     }
 
-
+                    // move unread chats to top
+                    if (card && total > 0) {
+                        NotificationSound();
+                        document.getElementById('chatList').prepend(card);
+                    }
                 });
-
-                if (old !== html) {
-                    box.innerHTML = html;
-                    box.scrollTop = box.scrollHeight;
-                }
             });
+
+            refreshChatList();
+
+        }, 2000);
+
+
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
+            return String(text)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
         }
 
-        $.get(base_url + 'Chatting/poll_updates', function(res) {
-            let data = JSON.parse(res);
+        // refreshChatList();
 
-            data.forEach(u => {
-
-                let senderId = u.senderId;
-                let total = parseInt(u.total);
-
-                let badge = document.getElementById('badge_' + senderId);
-                let card = document.getElementById('chat_user_' + senderId);
-
-                if (badge) {
-                    badge.innerText = total;
-                    badge.style.display = total > 0 ? 'inline-block' : 'none';
-                }
-
-                // move unread chats to top
-                if (card && total > 0) {
-                    NotificationSound();
-                    document.getElementById('chatList').prepend(card);
-                }
-            });
-        });
-
-        refreshChatList();
-
-    }, 2000);
-
-
-    function escapeHtml(text) {
-        if (text === null || text === undefined) return '';
-        return String(text)
-            .replaceAll('&', '&amp;')
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;')
-            .replaceAll('"', '&quot;')
-            .replaceAll("'", '&#039;');
-    }
-
-    refreshChatList();
+    // });
 </script>

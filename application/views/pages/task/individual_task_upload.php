@@ -5,18 +5,18 @@
         <h3 class="fw-bold">Assign Task to Individual</h3>
     </div>
 
-    <!-- Search Student Card -->
-    <div class="card mb-4">
-        <div class="card-header bg-white">
-            <h5 class="mb-0">Search Student</h5>
-        </div>
-        <div class="card-body">
-            <form id="FindStudentForm" data-parsley-validate>
-                <div class="row g-3">
+    <div class="card mb-3 border-dark">
+        <form id="studentSearchForm">
+            <div class="card-header p-1 ps-2">
+                <h6 class="mb-0">Search Students</h6>
+            </div>
+            <div class="card-body p-3">
+                <div class="row g-2 align-items-end">
 
-                    <div class="col-md-4">
-                        <label class="form-label">Education Type</label>
-                        <select class="form-select" name="education_type" required data-parsley-required-message="Education Type is required">
+                    <!-- Education Type -->
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Education Type</label>
+                        <select class="form-select form-select-sm" name="education_type">
                             <option value="">-- Select --</option>
 
                             <?php if (!empty($all_education_type)): ?>
@@ -31,33 +31,79 @@
                         </select>
                     </div>
 
-                    <div class="col-md-4">
-                        <label class="form-label">Student Name</label>
-                        <input type="text" class="form-control" name="student_name" data-parsley-required-message="Student Name is required">
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label">Class</label>
-                        <select class="form-select" name="class_section" required data-parsley-required-message="Class & Section is required">
+                    <!-- Class -->
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Class</label>
+                        <select class="form-select form-select-sm" name="class_id">
                             <option value="">--Select--</option>
                             <?php if (!empty($all_classes)): ?>
                                 <?php foreach ($all_classes as $type): ?>
                                     <option value="<?= $type->classId ?>"
                                         <?= (!empty($student->classId) && $student->classId == $type->classId) ? 'selected' : '' ?>>
-                                        <?= $type->className ?> <?= $type->sectionName ?>
+                                        <?= $type->className ?>
                                     </option>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </select>
                     </div>
 
+                    <!-- Section -->
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Section</label>
+                        <select class="form-select form-select-sm" name="section_id">
+                            <option value="">--Select--</option>
+                            <?php if (!empty($all_classes)): ?>
+                                <?php foreach ($all_classes as $type): ?>
+                                    <option value="<?= $type->classId ?>"
+                                        <?= (!empty($student->classId) && $student->classId == $type->classId) ? 'selected' : '' ?>>
+                                        <?= $type->sectionName ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+
+                    <!-- Student Name -->
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Student Name</label>
+                        <input type="text"
+                            name="student_name"
+                            class="form-control form-control-sm"
+                            placeholder="Type student name">
+                    </div>
+
+                    <!-- Batch Year -->
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Batch Year</label>
+                        <select class="form-select form-select-sm" name="batchYear">
+                            <option value="">--Select--</option>
+                            <?php
+                            if (!empty($all_batch_year)): ?>
+                                <?php foreach ($all_batch_year as $type): ?>
+                                    <?php
+                                    $selected =
+                                        (!empty($student->batchYear) && $student->batchYear == $type)
+                                        ? 'selected'
+                                        : '';
+                                    ?>
+                                    <option value="<?= $type ?>" <?= $selected ?>>
+                                        <?= $type ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+
+                    <!-- Search Button -->
+                    <div class="col-md-1 text-end">
+                        <button type="submit" class="btn btn-dark btn-sm w-100">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+
                 </div>
-
-                <button class="btn btn-primary mt-3" type="submit">Search</button>
-                <button class="btn btn-primary mt-3 ms-3" type="reset" id="resetBtn">Reset</button>
-
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 
 
@@ -78,7 +124,7 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="studentTableBody">
+                    <tbody id="studentsTableBody">
                         <?php
                         // echo "<br>";
                         // echo "<pre>";
@@ -88,38 +134,21 @@
                         ?>
                             <tr>
                                 <td><?= $record->studentId ?></td>
-                                <!-- <td>
-                                    <?php if (!empty($record->documentPath)): ?>
-                                        <img src="<?= base_url($record->documentPath); ?>"
-                                            alt="Profile Image"
-                                            class="img-thumbnail rounded-circle"
-                                            width="75">
-                                    <?php else: ?>
-                                        <img src="<?= base_url('assets/images/default-avatar.png'); ?>"
-                                            class="img-thumbnail rounded-circle"
-                                            width="75">
-                                    <?php endif; ?>
-                                </td> -->
                                 <td><?= $record->admissionNo ?></td>
-                                <!-- <td><?= date('d M Y g:i A', strtotime($record->addedOn)) ?></td> -->
                                 <td><?= $record->student_education_type ?></td>
                                 <td><?= $record->firstName ?> <?= $record->lastName ?></td>
                                 <td><?= $record->className ?> <?= $record->sectionName ?></td>
-                                <!-- <td><span class="badge bg-warning text-dark"><?= $record->status ?></span></td> -->
-
                                 <td>
                                     <div class="d-flex gap-2">
 
-                                        <!-- Controls Dropdown -->
                                         <div class="position-static">
-                                            <a class="btn btn-sm btn-info navigator" href="<?= site_url('Tasks/upload_task/student/').$record->studentId ?>">
+                                            <a class="btn btn-sm btn-info navigator" href="<?= site_url('Tasks/upload_task/student/') . $record->studentId ?>">
                                                 Assign Task
                                             </a>
                                         </div>
 
                                     </div>
                                 </td>
-
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -182,80 +211,69 @@
             // $("#pageContent").load("<?= base_url('Cms/fee_collection') ?>");
         });
 
-        $(document).on('submit', '#FindStudentForm', function(e) {
+        $('#studentSearchForm').off('submit').on('submit', function(e) {
             e.preventDefault();
 
-            let form = $(this);
-            if (!form.parsley().isValid()) return;
+            let formData = new FormData(this);
+
+            Swal.fire({
+                title: 'Searching...',
+                text: 'Please wait',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            console.log("form data = ", formData);
 
             $.ajax({
                 url: "<?= site_url('Student/find_student') ?>",
                 type: "POST",
-                data: form.serialize(),
+                data: formData,
                 dataType: "json",
+                contentType: false,
+                processData: false,
 
-                beforeSend: function() {
-                    $('#studentTableBody').html(
-                        '<tr><td colspan="9" class="text-center">Loading...</td></tr>'
-                    );
-                },
+                success: function(res) {
 
-                success: function(response) {
+                    Swal.close();
 
-                    if (!response.status || response.data.length === 0) {
-                        $('#studentTableBody').html(
-                            '<tr><td colspan="9" class="text-center text-muted">No students found</td></tr>'
-                        );
-                        return;
+                    if (res.status === true) {
+
+                        let html = '';
+
+                        $.each(res.data, function(i, record) {
+
+                            html += `
+                                <tr>
+                                    <td>${record.studentId}</td>
+                                    <td>${record.admissionNo}</td>
+                                    <td>${record.student_education_type}</td>
+                                    <td>${record.firstName} ${record.lastName}</td>
+                                    <td>${record.className} ${record.sectionName}</td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <div class="position-static">
+                                                <a class="btn btn-sm btn-info navigator"
+                                                href="<?= site_url('Tasks/upload_task/student/') ?>${record.studentId}">
+                                                    Assign Task
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>`;
+                        });
+
+                        // ✅ Inject into table body
+                        $('#studentTableBody').html(html);
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'No Data',
+                            text: 'No students found'
+                        });
                     }
-
-                    let rows = '';
-
-                    response.data.forEach(function(r) {
-
-                        let img = r.documentPath ?
-                            "<?= base_url() ?>" + r.documentPath :
-                            "<?= base_url('assets/images/default-avatar.png') ?>";
-
-                        let date = new Date(r.addedOn).toLocaleString();
-
-                        rows += `
-                        <tr>
-                            <td>${r.studentId}</td>
-
-                            <!-- <td>
-                                <img src="${img}"
-                                     class="img-thumbnail rounded-circle"
-                                     width="70">
-                            </td> -->
-                            <td>${r.admissionNo}</td>
-                            <!-- <td>${date}</td> -->
-                            <td>${r.student_education_type}</td>
-                            <td>${r.firstName} ${r.lastName}</td>
-                            <td>${r.className} ${r.sectionName}</td>
-
-                            <!-- <td>
-                                <span class="badge bg-warning text-dark">
-                                    ${r.status}
-                                </span>
-                            </td> -->
-
-                            <td>
-                                <a class="btn btn-sm btn-info navigator" href="<?= site_url('Tasks/upload_task/student/').$record->studentId ?>">
-                                    Assign Task
-                                </a>
-                            </td>
-                        </tr>
-                    `;
-                    });
-
-                    $('#studentTableBody').html(rows);
-                },
-
-                error: function() {
-                    $('#studentTableBody').html(
-                        '<tr><td colspan="9" class="text-danger text-center">Server Error</td></tr>'
-                    );
                 }
             });
         });

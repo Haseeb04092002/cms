@@ -63,18 +63,45 @@
         </div>
     </div>
 
-    <div class="card mb-3">
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-3">
-                    <label class="form-label">Search</label>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+    <div class="card mb-3 border-dark">
+        <form id="subjectSearchForm">
+            <div class="card-header p-1 ps-2">
+                <h6 class="mb-0">Search Subjects</h6>
+            </div>
+            <div class="card-body p-3">
+                <div class="row g-2 align-items-end">
+
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Subject Name</label>
+                        <input type="text"
+                            name="subjectName"
+                            class="form-control form-control-sm">
                     </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Subject Code</label>
+                        <input type="text"
+                            name="subjectCode"
+                            class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Subject Description</label>
+                        <input type="text"
+                            name="description"
+                            class="form-control form-control-sm">
+                    </div>
+
+                    <!-- Search Button -->
+                    <div class="col-md-1 text-end">
+                        <button type="submit" class="btn btn-dark btn-sm w-100">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+
                 </div>
             </div>
-        </div>
+        </form>
     </div>
 
     <div class="card">
@@ -90,7 +117,7 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="subjectTableBody">
                         <?php foreach ($all_subjects as $subject) : ?>
                             <tr>
                                 <td><?= $subject->subjectId ?></td>
@@ -362,6 +389,174 @@
                         });
                     }
                 }
+            });
+        });
+
+        $('#subjectSearchForm').off('submit').on('submit', function(e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+
+            Swal.fire({
+                title: 'Searching...',
+                text: 'Please wait',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            console.log("form data = ", formData);
+
+            $.ajax({
+                url: "<?= site_url('Subject/find_subject') ?>",
+                type: "POST",
+                data: formData,
+                dataType: "json",
+                contentType: false,
+                processData: false,
+
+                success: function(res) {
+
+                    Swal.close();
+
+                    if (res.status === true) {
+                        let html = '';
+                        $.each(res.data, function(i, subject) {
+
+                            html += `
+                                    <tr>
+                                        <td>${subject.subjectId}</td>
+                                        <td>${subject.subjectName}</td>
+                                        <td>${subject.subjectCode}</td>
+                                        <td>${subject.description}</td>
+                                        <td>
+
+                                            <button type="button"
+                                                class="btn btn-sm btn-primary"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editModal${subject.subjectId}">
+                                                Edit
+                                            </button>
+
+                                            <button type="button"
+                                                class="btn btn-sm btn-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal${subject.subjectId}">
+                                                Delete
+                                            </button>
+
+                                            <!-- DELETE MODAL -->
+                                            <div class="modal fade"
+                                                id="deleteModal${subject.subjectId}"
+                                                tabindex="-1"
+                                                aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content">
+
+                                                        <div class="modal-header bg-light">
+                                                            <h5 class="modal-title">Confirm Delete</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+
+                                                        <form class="FormDeleteSubject">
+                                                            <div class="modal-body">
+                                                                <p>Are you sure you want to delete this item ?</p>
+                                                                <input type="hidden" name="subjectId" value="${subject.subjectId}">
+                                                                <div class="text-end">
+                                                                    <button class="btn btn-danger BtnDeleteSubject">Yes</button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- EDIT MODAL -->
+                                            <div class="modal fade"
+                                                id="editModal${subject.subjectId}"
+                                                tabindex="-1"
+                                                aria-hidden="true">
+                                                <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                                                    <div class="modal-content">
+
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Edit Subject</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+
+                                                        <form class="FormEditSubject">
+                                                            <input type="hidden" name="subjectId" value="${subject.subjectId}">
+
+                                                            <div class="modal-body">
+                                                                <div class="row g-3">
+
+                                                                    <div class="col-md-6">
+                                                                        <label class="form-label">Subject Name</label>
+                                                                        <input type="text"
+                                                                            name="subjectName"
+                                                                            class="form-control"
+                                                                            value="${subject.subjectName}"
+                                                                            required>
+                                                                    </div>
+
+                                                                    <div class="col-md-6">
+                                                                        <label class="form-label">Subject Code</label>
+                                                                        <input type="text"
+                                                                            name="subjectCode"
+                                                                            class="form-control"
+                                                                            value="${subject.subjectCode}"
+                                                                            required>
+                                                                    </div>
+
+                                                                    <div class="col-md-12">
+                                                                        <label class="form-label">Description</label>
+                                                                        <input type="text"
+                                                                            name="description"
+                                                                            class="form-control"
+                                                                            value="${subject.description}"
+                                                                            required>
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="modal-footer">
+                                                                <button type="button"
+                                                                    class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal">
+                                                                    Cancel
+                                                                </button>
+                                                                <button type="submit"
+                                                                    class="btn btn-success BtnEditSubject">
+                                                                    Save Subject
+                                                                </button>
+                                                            </div>
+                                                        </form>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </td>
+                                    </tr>`;
+                        });
+
+                        $('#subjectTableBody').html(html);
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: res.message,
+                            icon: 'error',
+                            position: 'center',
+                            timer: 3000,
+                            showConfirmButton: true,
+                            confirmButtonText: 'OK',
+                        });
+                    }
+                }
+
             });
         });
     });

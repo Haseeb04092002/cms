@@ -227,7 +227,7 @@ class Tasks extends MY_Controller
 		$StationId = '';
 		$UserId = $this->session->userdata('user_id') ?? '';
 		$StationId = $this->session->userdata('station_id') ?? '';
-		
+
 		$taskId = $this->input->post('taskId') ?? '';
 
 		$Response['status']  = false;
@@ -241,7 +241,6 @@ class Tasks extends MY_Controller
 		}
 
 		exit(json_encode($Response));
-
 	}
 
 	public function all_tasks()
@@ -283,8 +282,11 @@ class Tasks extends MY_Controller
 
 		$all_tasks = $this->db->get()->result();
 
+		$all_classes = $this->db->select('classId, className, sectionName')->where('stationId', $StationId)->where('isDeleted', 0)->get('tbl_classes')->result();
+
 		$data = array();
 		$data['all_tasks'] = $all_tasks;
+		$data['all_classes'] = $all_classes;
 		$this->load->view('pages/task/all_tasks', $data);
 	}
 
@@ -708,5 +710,104 @@ class Tasks extends MY_Controller
 		// die();
 
 		$this->load->view('pages/student/student_tasks', $data);
+	}
+
+	public function find_task()
+	{
+		$Response['status']  = false;
+		$Response['message'] = "Some Error Occured. Try Again";
+
+		$stationId     = $this->session->userdata('station_id');
+
+		$taskTitle   = $this->input->post('taskTitle') ?? '';
+		$assignDate  = $this->input->post('assignDate') ?? '';
+		$status      = $this->input->post('status') ?? '';
+		$studentName = $this->input->post('studentName') ?? '';
+		$classId   = $this->input->post('class_id') ?? '';
+		$sectionId = $this->input->post('section_id') ?? '';
+
+		if (empty($classId) && empty($sectionId) && empty($taskTitle) && empty($assignDate) && empty($status) && empty($studentName)) {
+			$Response['message'] = "Please select at least one filter.";
+			exit(json_encode($Response));
+		}
+
+		$this->db->select('
+        t.taskId,
+        t.taskTitle,
+        t.status,
+        t.addedOn,
+
+        t.studentId,
+        t.classId,
+
+        s.firstName,
+        s.lastName,
+        s.education_type AS student_education_type,
+
+        c.className,
+        c.sectionName
+    ');
+
+		$this->db->from('tbl_tasks t');
+
+		$this->db->join(
+			'tbl_students s',
+			's.studentId = t.studentId
+         AND s.stationId = t.stationId',
+			'left'
+		);
+
+		$this->db->join(
+			'tbl_classes c',
+			'c.classId = t.classId
+         AND c.stationId = t.stationId',
+			'left'
+		);
+
+		$this->db->where('t.stationId', $stationId);
+		$this->db->where('t.isDeleted', 0);
+
+		if ($taskTitle !== '') {
+			$this->db->like('t.taskTitle', $taskTitle);
+		}
+
+		if ($assignDate !== '') {
+			$this->db->where('DATE(t.startDate)', $assignDate);
+		}
+
+		if ($status !== '') {
+			$this->db->where('t.status', $status);
+		}
+
+		if ($classId !== '') {
+			$this->db->where('t.classId', $classId);
+		}
+
+		if ($sectionId !== '') {
+			$this->db->where('c.sectionName', $sectionId);
+		}
+
+		if ($studentName !== '') {
+			$this->db->group_start();
+			$this->db->like('s.firstName', $studentName);
+			$this->db->or_like('s.lastName', $studentName);
+			$this->db->group_end();
+		}
+
+		$this->db->order_by('t.addedOn', 'DESC');
+
+		$tasks = $this->db->get()->result();
+		// echo "<br> all students = ".print_r($students, true);
+		// die();
+		if (empty($tasks)) {
+			$Response['message'] = "No tasks found matching the criteria.";
+			exit(json_encode($Response));
+		}
+
+		$Response['status']  = true;
+		$Response['data'] = $tasks;
+		$Response['message'] = "Tasks found successfully.";
+
+		exit(json_encode($Response));
 	}
 }

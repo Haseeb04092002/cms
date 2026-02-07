@@ -43,6 +43,13 @@ class Student extends MY_Controller
             $enum = str_replace(["enum(", ")", "'"], "", $row->Type);
             $all_education_type = explode(",", $enum);
         }
+        $query = $this->db->query("SHOW COLUMNS FROM tbl_students LIKE 'batchYear'");
+        $row = $query->row();
+        $all_batch_year = [];
+        if ($row) {
+            $enum = str_replace(["enum(", ")", "'"], "", $row->Type);
+            $all_batch_year = explode(",", $enum);
+        }
         // echo '<pre>';
         // print_r($row);
         // exit;
@@ -51,6 +58,7 @@ class Student extends MY_Controller
             'all_genders' => $all_genders,
             'all_classes' => $all_classes,
             'all_education_type' => $all_education_type,
+            'all_batch_year' => $all_batch_year,
             'admissionNo' => $date
         ]);
     }
@@ -80,27 +88,16 @@ class Student extends MY_Controller
         $this->form_validation->set_rules('admission_no', 'admission_no', 'required');
         $this->form_validation->set_rules('education_type', 'education_type', 'required');
         $this->form_validation->set_rules('class_section', 'class_section', 'required');
+        $this->form_validation->set_rules('batchYear', 'batchYear', 'required');
 
         // Student Info
         $this->form_validation->set_rules('student_first_name', 'student_first_name', 'required');
         $this->form_validation->set_rules('student_last_name', 'student_last_name', 'required');
         $this->form_validation->set_rules('dob', 'dob', 'required');
         $this->form_validation->set_rules('gender', 'gender', 'required');
-        // $this->form_validation->set_rules('previous_school', 'previous_school', 'required');
-
-        // Other Children (ARRAYS)
-        // $this->form_validation->set_rules('child_name', 'child_name', 'required');   // array
-        // $this->form_validation->set_rules('child_age', 'child_age', 'required');    // array
-        // $this->form_validation->set_rules('child_class', 'child_class', 'required');  // array
-
-        // $this->form_validation->set_rules('father_name', 'father_name', 'required');
-        // $this->form_validation->set_rules('mother_name', 'mother_name', 'required');
-        // $this->form_validation->set_rules('guardian_name', 'guardian_name', 'required');
 
         $this->form_validation->set_rules('contact_1', 'contact_1', 'required');
-        // $this->form_validation->set_rules('contact_2', 'contact_2', 'required');
 
-        // $this->form_validation->set_rules('email', 'email', 'required');
         $this->form_validation->set_rules('cnic', 'cnic', 'required');
         $this->form_validation->set_rules('address', 'address', 'required');
 
@@ -115,6 +112,7 @@ class Student extends MY_Controller
             $admission_no      = $this->input->post('admission_no');
             $education_type    = $this->input->post('education_type');
             $class_section     = $this->input->post('class_section');
+            $batchYear     = $this->input->post('batchYear');
 
             // Student Info
             $student_first_name = $this->input->post('student_first_name');
@@ -181,6 +179,7 @@ class Student extends MY_Controller
             $data_students['dateOfBirth'] = $dob;
             $data_students['prev_school'] = $previous_school;
             $data_students['classId'] = $class_section;
+            $data_students['batchYear'] = $batchYear;
             $data_students['addedOn'] = date('Y-m-d H:i:s');
             $data_students['addedBy'] = $UserId;
 
@@ -772,66 +771,70 @@ class Student extends MY_Controller
         $dompdf->stream("character_certificate.pdf", ["Attachment" => 0]);
     }
 
-    public function find_student()
+    public function find_student($case = "")
     {
-        $StationId = $this->session->userdata('station_id') ?? '';
+        $Response['status']  = false;
+        $Response['message'] = "Some Error Occured. Try Again";
 
-        $education_type = $this->input->post('education_type');
-        $class_section  = $this->input->post('class_section');
-        $student_name   = $this->input->post('student_name');
+        $station_id     = $this->session->userdata('station_id');
 
-        $this->db->select('
-			s.studentId,
-			s.admissionNo,
-			s.addedOn,
-			s.education_type AS student_education_type,
-			s.firstName,
-			s.lastName,
-			s.status,
+        $education_type = $this->input->post('education_type') ?? '';
+        $class_name     = $this->input->post('class_id') ?? '';
+        $section_name   = $this->input->post('section_id') ?? '';
+        $student_name   = $this->input->post('student_name') ?? '';
+        $batch_year     = $this->input->post('batch_year') ?? '';
 
-			c.className,
-			c.sectionName,
+        // echo "<br> education_type = ".$education_type; 
+        // echo "<br> class_name = ".$class_name;     
+        // echo "<br> section_name = ".$section_name;   
+        // echo "<br> student_name = ".$student_name;   
+        // echo "<br> batch_year = ".$batch_year;     
 
-			d.documentPath
-		');
+        if (empty($education_type) && empty($class_name) && empty($section_name) && empty($student_name) && empty($batch_year)) {
+            $Response['message'] = "Please select at least one filter.";
+            exit(json_encode($Response));
+        }
 
-        $this->db->from('tbl_students s');
-        $this->db->join('tbl_classes c', 'c.classId = s.classId', 'left');
-
-        $this->db->join(
-            'tbl_documents d',
-            's.admissionNo = d.referenceId
-			AND d.referenceType = "student"
-			AND d.documentTitle = "profile_img"
-			AND d.isDeleted = 0
-			AND d.stationId = ' . $this->db->escape($StationId),
-            'left'
+        $students = $this->Student_model->find_students(
+            $station_id,
+            $education_type,
+            $class_name,
+            $section_name,
+            $student_name,
+            $batch_year
         );
 
-        if ($education_type) {
-            $this->db->where('s.education_type', $education_type);
+        // echo "<br> all students = ".print_r($students, true);
+        // die();
+
+        if (empty($students)) {
+            $Response['message'] = "No students found matching the criteria.";
+            exit(json_encode($Response));
+        }
+        switch ($case) {
+            case 'fee_collection':
+                $html = $this->load->view(
+                    'commons/student_row_fee_collection',
+                    ['records' => $students],
+                    true
+                );
+                break;
+
+            default:
+                $html = $this->load->view(
+                    'commons/student_row',
+                    ['records' => $students],
+                    true
+                );
+                break;
         }
 
-        if ($class_section) {
-            $this->db->where('s.classId', $class_section);
-        }
+        $Response['status']  = true;
+        $Response['message'] = "Students found successfully.";
+        $Response['html']    = $html;
+        $Response['count']    = count($students);
 
-        if ($student_name) {
-            $this->db->group_start();
-            $this->db->like('s.firstName', $student_name);
-            $this->db->or_like('s.lastName', $student_name);
-            $this->db->group_end();
-        }
-
-        $this->db->where('s.stationId', $StationId);
-        $this->db->order_by('s.addedOn', 'DESC');
-
-        $students = $this->db->get()->result_array();
-
-        echo json_encode([
-            'status' => true,
-            'data'   => $students
-        ]);
+        exit(json_encode($Response));
     }
 
 
@@ -879,7 +882,34 @@ class Student extends MY_Controller
         $this->db->order_by('s.addedOn', 'DESC');
 
         $all_students = $this->db->get()->result();
+
+        $query = $this->db->query("SHOW COLUMNS FROM tbl_students LIKE 'education_type'");
+        $row = $query->row();
+        $all_education_type = [];
+        if ($row) {
+            $enum = str_replace(["enum(", ")", "'"], "", $row->Type);
+            $all_education_type = explode(",", $enum);
+        }
+
+        $query = $this->db->query("SHOW COLUMNS FROM tbl_students LIKE 'batchYear'");
+        $row = $query->row();
+        $all_batch_year = [];
+        if ($row) {
+            $enum = str_replace(["enum(", ")", "'"], "", $row->Type);
+            $all_batch_year = explode(",", $enum);
+        }
+
+        $all_classes = $this->db->select('classId, className, sectionName')->where('stationId', $StationId)->where('isDeleted', 0)->order_by('addedOn', 'DESC')->get('tbl_classes')->result();
+
         $data['all_students'] = $all_students;
+        $data['all_education_type'] = $all_education_type;
+        $data['all_batch_year'] = $all_batch_year;
+        $data['all_classes'] = $all_classes;
+
+        // echo "<br>";
+        // echo "<pre>";
+        // print_r($all_batch_year);
+        // die();
 
         $this->load->view('pages/student/all_students', $data);
     }
