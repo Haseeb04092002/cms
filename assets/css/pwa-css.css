@@ -1,0 +1,551 @@
+/* =====================================================
+   PWA THEME – iTimium (Orange / Black / White / Gray)
+   Lightweight • Reusable • PWA Optimized
+   ===================================================== */
+
+/* ---------- CSS VARIABLES ---------- */
+:root {
+    /* Brand */
+    --brand-orange: #f68a0a;
+    --brand-black: #0f0f10;
+
+    /* Surfaces */
+    --bg-app: #f4f6f9;
+    --bg-card: #ffffff;
+    --bg-muted: #f1f2f4;
+
+    /* Text */
+    --text-primary: #0f0f10;
+    --text-muted: #8a8f98;
+    --text-invert: #ffffff;
+
+    /* Borders & shadows */
+    --border-light: #e6e9ef;
+    --shadow-soft: 0 6px 16px rgba(0,0,0,.08);
+    --shadow-top: 0 -4px 12px rgba(0,0,0,.08);
+
+    /* Radius */
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 18px;
+
+    /* Navigation */
+    --nav-height: 72px;
+}
+
+/* ---------- BASE ---------- */
+body {
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+}
+
+/* ---------- CARDS ---------- */
+.pwa-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    border: none;
+}
+
+.pwa-card-shadow {
+    box-shadow: var(--shadow-soft);
+}
+
+/* ---------- PROFILE AVATAR ---------- */
+.pwa-avatar {
+    width: 72px;
+    height: 72px;
+    font-size: 26px;
+    background: var(--bg-card);
+    color: var(--brand-orange);
+}
+
+/* ---------- INFO TILES ---------- */
+.pwa-tile {
+    background: var(--brand-orange);
+    color: var(--text-invert);
+    border-radius: var(--radius-sm);
+    min-height: 90px;
+}
+
+/* ---------- ACTION BUTTONS ---------- */
+.pwa-action-btn {
+    border-radius: var(--radius-sm);
+    padding: 12px 6px;
+    font-weight: 500;
+    border-color: var(--brand-orange);
+    color: var(--text-invert);
+    background: var(--brand-orange);
+}
+
+.pwa-action-btn:hover,
+.pwa-action-btn:active {
+    background: var(--brand-orange);
+    color: var(--text-invert);
+}
+
+/* ---------- MODALS ---------- */
+.pwa-modal .modal-content {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.pwa-modal .modal-header {
+    background: var(--brand-black);
+    color: var(--text-invert);
+    border-bottom: none;
+}
+
+.pwa-modal .list-group-item {
+    padding: 14px 16px;
+    font-size: 15px;
+    border-color: var(--border-light);
+}
+
+/* ---------- TEXT HELPERS ---------- */
+.pwa-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.pwa-muted {
+    color: var(--text-muted);
+}
+
+/* ---------- SCROLLING ---------- */
+#pageContent {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* =====================================================
+   PWA BOTTOM NAV – iTimium Theme
+   ===================================================== */
+
+.pwa-bottom-nav {
+    background: var(--bg-card);
+    border-top: 1px solid var(--border-light);
+    box-shadow: var(--shadow-top);
+    padding: 4px 0;
+}
+
+/* Nav item */
+.pwa-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-decoration: none;
+    color: var(--text-muted);
+
+    font-size: 10.5px;
+    line-height: 1.1;
+
+    padding: 4px 0;
+    transition: color .2s ease, transform .15s ease;
+}
+
+/* Icon */
+.pwa-nav-item i {
+    font-size: 17px;
+    margin-bottom: 2px;
+    color: inherit;
+}
+
+/* Active state */
+.pwa-nav-item.active {
+    color: var(--brand-orange);
+    font-weight: 500;
+}
+
+/* Active indicator (subtle underline dot) */
+.pwa-nav-item.active::after {
+    content: '';
+    width: 16px;
+    height: 3px;
+    background: var(--brand-orange);
+    border-radius: 3px;
+    margin-top: 4px;
+}
+
+/* Touch feedback */
+.pwa-nav-item:active {
+    transform: scale(.95);
+}
+
+
+
+/* =====================================================
+   TASKS VIEW – Mobile App Styling
+   ===================================================== */
+
+/* Search box */
+.pwa-task-search {
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-size: 14px;
+}
+
+/* Tabs */
+.pwa-task-tabs .nav-link {
+    color: var(--text-muted);
+    font-size: 12px;
+    padding: 8px 6px;
+    border-radius: 20px;
+}
+
+.pwa-task-tabs .nav-link.active {
+    background: var(--brand-orange);
+    color: var(--text-invert);
+    font-weight: 500;
+}
+
+/* Task Card */
+.pwa-task-card {
+    border-radius: 16px;
+    border: none;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-soft);
+}
+
+/* Task title */
+.pwa-task-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Subject text */
+.pwa-task-subject {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* Task meta info */
+.pwa-task-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* Description */
+.pwa-task-desc {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.4;
+}
+
+/* Status badges */
+.pwa-badge-pending {
+    background: #fff3e0;
+    color: var(--brand-orange);
+}
+
+.pwa-badge-complete {
+    background: #e6f4ea;
+    color: #198754;
+}
+
+.pwa-badge-overdue {
+    background: #fdecea;
+    color: #dc3545;
+}
+
+.pwa-badge-result {
+    background: #e7f1ff;
+    color: #0d6efd;
+}
+
+/* Action buttons */
+.pwa-task-actions .btn {
+    border-radius: 12px;
+    font-size: 12px;
+    padding: 8px 6px;
+}
+
+/* Touch feedback */
+.pwa-task-card:active {
+    transform: scale(.98);
+}
+
+/* Empty state */
+.pwa-task-empty {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    padding: 40px 10px;
+}
+
+
+/* =====================================================
+   PROGRESS VIEW – Mobile App Style
+   ===================================================== */
+
+/* Date filter card */
+.pwa-progress-filters .form-control {
+    border-radius: 12px;
+    font-size: 13px;
+    padding: 10px 12px;
+}
+
+.pwa-progress-filters .btn {
+    border-radius: 20px;
+    font-size: 12px;
+    padding: 6px 10px;
+}
+
+/* Progress tabs */
+.pwa-progress-tabs .nav-link {
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 8px 6px;
+    border-radius: 20px;
+}
+
+.pwa-progress-tabs .nav-link.active {
+    background: var(--brand-orange);
+    color: var(--text-invert);
+    font-weight: 500;
+}
+
+/* Progress cards */
+.pwa-progress-card {
+    border-radius: 16px;
+    border: none;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-soft);
+}
+
+/* Subject title */
+.pwa-progress-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Meta text */
+.pwa-progress-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* Progress bars */
+.pwa-progress-bar {
+    height: 10px;
+    border-radius: 10px;
+    background: #eee;
+}
+
+.pwa-progress-bar .progress-bar {
+    border-radius: 10px;
+    background: var(--brand-orange);
+}
+
+/* Attendance percentage */
+.pwa-attendance-percent {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--brand-orange);
+}
+
+/* Medical info rows */
+.pwa-medical-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.pwa-medical-row:last-child {
+    border-bottom: none;
+}
+
+/* Medical history list */
+.pwa-medical-list li {
+    font-size: 13px;
+    padding: 10px 0;
+}
+
+/* Touch feedback */
+.pwa-progress-card:active {
+    transform: scale(.98);
+}
+
+
+/* =====================================================
+   FEES VIEW – Mobile App Style
+   ===================================================== */
+
+.pwa-fee-search {
+    border-radius: 14px;
+    font-size: 14px;
+    padding: 12px 14px;
+}
+
+/* Tabs */
+.pwa-fee-tabs .nav-link {
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 8px 6px;
+    border-radius: 20px;
+}
+
+.pwa-fee-tabs .nav-link.active {
+    background: var(--brand-orange);
+    color: var(--text-invert);
+    font-weight: 500;
+}
+
+/* Fee Card */
+.pwa-fee-card {
+    border-radius: 16px;
+    border: none;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-soft);
+}
+
+/* Title */
+.pwa-fee-title {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+/* Meta */
+.pwa-fee-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* Badges */
+.pwa-fee-badge-paid {
+    background: #e6f4ea;
+    color: #198754;
+}
+
+.pwa-fee-badge-unpaid {
+    background: #fff3e0;
+    color: var(--brand-orange);
+}
+
+.pwa-fee-badge-history {
+    background: #e9ecef;
+    color: #495057;
+}
+
+/* Voucher rows */
+.pwa-fee-voucher-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border-light);
+}
+
+.pwa-fee-voucher-row:last-child {
+    border-bottom: none;
+}
+
+/* Touch feedback */
+.pwa-fee-card:active {
+    transform: scale(.98);
+}
+
+
+
+
+
+
+
+/* =====================================================
+   CALENDAR – Parent & Child Tabs
+   ===================================================== */
+
+/* Parent tabs (Lectures / Exams) */
+.pwa-calendar-parent-tabs .nav-link {
+    font-size: 15px;
+    font-weight: 600;
+    padding: 12px 8px;
+    border-radius: 16px;
+    color: var(--text-muted);
+}
+
+.pwa-calendar-parent-tabs .nav-link.active {
+    background: var(--brand-orange);
+    color: var(--text-invert);
+}
+
+/* Child tabs (Today / Week / Month) */
+.pwa-calendar-child-tabs .nav-link {
+    font-size: 11px;
+    padding: 6px 4px;
+    border-radius: 14px;
+    color: var(--text-muted);
+}
+
+.pwa-calendar-child-tabs .nav-link.active {
+    background: var(--bg-muted);
+    color: var(--brand-orange);
+    font-weight: 500;
+}
+
+/* =====================================================
+   TIMETABLE – Mobile Fit
+   ===================================================== */
+
+.pwa-timetable-wrapper {
+    overflow-x: auto;
+    background: var(--bg-card);
+    border-radius: 14px;
+    box-shadow: var(--shadow-soft);
+}
+
+/* Header */
+.pwa-timetable-header,
+.pwa-timetable-row {
+    display: flex;
+    align-items: stretch;
+}
+
+/* Day column */
+.pwa-day-col {
+    min-width: 64px;
+    padding: 10px 6px;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--bg-muted);
+    text-align: center;
+}
+
+/* Period columns */
+.pwa-period-col {
+    min-width: 90px;
+    padding: 8px 4px;
+    font-size: 11px;
+    text-align: center;
+}
+
+/* Lecture cards */
+.pwa-lecture-card {
+    min-width: 90px;
+    margin: 6px;
+    padding: 8px 6px;
+    border-radius: 10px;
+    background: #f1f2f4;
+    text-align: center;
+    font-size: 12px;
+}
+
+.pwa-lecture-card small {
+    display: block;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* Exam cards */
+.pwa-exam-card {
+    border-radius: 14px;
+    border: none;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-soft);
+}
+

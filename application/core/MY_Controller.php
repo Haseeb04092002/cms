@@ -7,16 +7,34 @@ class MY_Controller extends CI_Controller
     {
         parent::__construct();
 
-        if (!$this->session->userdata('user_id')) {
+        $this->load->library('user_agent');
+
+        $is_logged_in = $this->session->userdata('user_id');
+        $is_mobile    = $this->agent->is_mobile();
+
+        // Get current controller
+        $controller = strtolower($this->router->class);
+
+        // Allow login controllers without redirect
+        $auth_controllers = ['login', 'pwa'];
+
+        if (!$is_logged_in && !in_array($controller, $auth_controllers)) {
+
             $this->session->sess_destroy();
-            redirect('Login');
+
+            // if ($is_mobile) {
+                redirect('pwa/login');
+            // } else {
+                // redirect('login');
+            // }
         }
     }
+
 
     function simplify_text($string)
     {
         // Convert to lowercase
-        if(!empty($string)){
+        if (!empty($string)) {
             $string = strtolower($string);
         }
 

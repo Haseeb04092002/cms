@@ -22,7 +22,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
         /* Background */
         .login-wrapper {
             min-height: 100vh;
-            background: linear-gradient(135deg, #4f46e5, #3b82f6);
+            /* background: linear-gradient(135deg, #4f46e5, #3b82f6); */
+            background: linear-gradient(135deg, #e54646, #3b82f6);
             padding: 20px;
         }
 
@@ -197,10 +198,9 @@ defined('BASEPATH') or exit('No direct script access allowed');
                         });
 
                     } else {
-                        var url = "<?= base_url('Cms') ?>";
+                        var url = "<?= base_url('Pwa') ?>";
                         console.log(url);
                         window.location.href = url;
-
                     }
                 }
             });

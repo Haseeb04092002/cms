@@ -47,4 +47,5 @@
 <!-- ================= CUSTOM CSS ================= -->
 
 <!-- Main Custom Styles (Always LAST) -->
-<!-- <link href="<?= base_url('assets/css/style.css'); ?>" rel="stylesheet"> -->
+ <link rel="stylesheet" href="<?= base_url('assets/css/pwa-css.css') ?>">
+
