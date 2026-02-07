@@ -1,8 +1,26 @@
-RewriteEngine on
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule .* index.php/$0 [PT,L]  
+RewriteEngine On
 
+# ======================================================
+# ✅ EXCLUDE PWA FILES (VERY IMPORTANT)
+# ======================================================
+RewriteRule ^manifest\.json$ - [L]
+RewriteRule ^service-worker\.js$ - [L]
+
+# ======================================================
+# ✅ EXCLUDE STATIC ASSETS
+# ======================================================
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# ======================================================
+# ✅ EXISTING FRONT CONTROLLER (UNCHANGED LOGIC)
+# ======================================================
+RewriteRule ^(.*)$ index.php/$1 [PT,L]
+
+# ======================================================
+# ✅ HEADERS (KEEP AS YOU HAD)
+# ======================================================
 <IfModule mod_headers.c>
-Header set Access-Control-Allow-Origin "*"
+  Header set Access-Control-Allow-Origin "*"
 </IfModule>
