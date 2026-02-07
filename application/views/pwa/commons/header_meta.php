@@ -30,7 +30,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Schoolium">
 
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="https://cms.itimium.com.pk/manifest.json">
 <link rel="apple-touch-icon" sizes="192x192" href="https://cms.itimium.com.pk/assets/icons/icon-192x192.png">
 <link rel="apple-touch-icon" sizes="512x512" href="https://cms.itimium.com.pk/assets/icons/icon-512x512.png">
 
