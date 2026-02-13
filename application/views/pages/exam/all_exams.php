@@ -31,11 +31,11 @@
                                 </a>
 
                                 <!-- Create For Student -->
-                                <a href="<?= site_url('Exams/create_exam_for_student') ?>"
+                                <!-- <a href="<?= site_url('Exams/create_exam_for_student') ?>"
                                     class="btn btn-success btn-lg navigator" data-bs-dismiss="modal">
                                     <i class="bi bi-person-fill me-2"></i>
                                     Create for Student
-                                </a>
+                                </a> -->
 
                             </div>
 
@@ -48,18 +48,70 @@
         </div>
     </div>
 
-    <div class="card mb-3">
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-3">
-                    <label class="form-label">Search</label>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+    <div class="card mb-3 border-dark">
+        <form id="teacherSearchForm">
+            <div class="card-header p-1 ps-2">
+                <h6 class="mb-0">Search Teachers</h6>
+            </div>
+            <div class="card-body p-3">
+                <div class="row g-2 align-items-end">
+
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Exam Title</label>
+                        <input type="text"
+                            name="examTitle"
+                            class="form-control form-control-sm">
                     </div>
+
+                    <!-- Class -->
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Class</label>
+                        <select class="form-select form-select-sm" name="class_id">
+                            <option value="">--Select--</option>
+                            <?php if (!empty($classes)): ?>
+                                <?php foreach ($classes as $type): ?>
+                                    <option value="<?= $type->classId ?>"
+                                        <?= (!empty($student->classId) && $student->classId == $type->classId) ? 'selected' : '' ?>>
+                                        <?= $type->className ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+
+                    <!-- Section -->
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Section</label>
+                        <select class="form-select form-select-sm" name="section_id">
+                            <option value="">--Select--</option>
+                            <?php if (!empty($classes)): ?>
+                                <?php foreach ($classes as $type): ?>
+                                    <option value="<?= $type->classId ?>"
+                                        <?= (!empty($student->classId) && $student->classId == $type->classId) ? 'selected' : '' ?>>
+                                        <?= $type->sectionName ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Subject Name</label>
+                        <input type="text"
+                            name="contact"
+                            class="form-control form-control-sm">
+                    </div>
+
+                    <!-- Search Button -->
+                    <div class="col-md-1 text-end">
+                        <button type="submit" class="btn btn-dark btn-sm w-100">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+
                 </div>
             </div>
-        </div>
+        </form>
     </div>
 
     <div class="card">
@@ -72,10 +124,11 @@
                             <th>Title</th>
                             <th>Class</th>
                             <th>Subject</th>
-                            <th>Student</th>
                             <th>Date</th>
                             <th>Duration</th>
                             <th>Total Marks</th>
+                            <th>Obtained Marks</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -86,17 +139,15 @@
                                 <td><?= $exam->examTitle ?></td>
                                 <td><?= $exam->className ?? '-' ?> <?= $exam->sectionName ?? '-' ?></td>
                                 <td><?= $exam->subjectName ?? '--' ?></td>
-                                <td><?= $exam->firstName ?? '-' ?> <?= $exam->lastName ?? '-' ?></td>
                                 <td><?= date('d-m-Y', strtotime($exam->examDate)) ?></td>
                                 <td><?= $exam->duration ?? '--' ?> mins</td>
                                 <td><?= $exam->totalMarks ?? '--' ?></td>
+                                <td><?= $exam->obtainedMarks ?? '--' ?></td>
+                                <td><?= $exam->examStatus ?? '--' ?></td>
                                 <td>
                                     <a href="<?= site_url('Exams/view_exam/') . $exam->examId ?>" class="navigator btn btn-sm btn-primary">
                                         View
                                     </a>
-                                    <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?= $exam->examId ?>">
-                                        Edit
-                                    </button>
                                     <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal<?= $exam->examId ?>">
                                         Delete
                                     </button>

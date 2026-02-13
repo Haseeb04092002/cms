@@ -5,7 +5,15 @@ class Exams extends MY_Controller
 {
 	public function exam_dashboard()
 	{
-		$this->load->view('pages/exam/exam_dashboard');
+		$StationId = $this->session->userdata('station_id') ?? '';
+		$classes = $this->db->select('className, sectionName, classId')->from('tbl_classes')->where('stationId', $StationId)->where('isDeleted', 0)->get()->result();
+		$data = array();
+		$data['classes'] = $classes;
+		// echo "<br>";
+		// echo "<pre>";
+		// print_r($data);
+		// die();
+		$this->load->view('pages/exam/exam_dashboard', $data);
 	}
 
 	public function create()
@@ -82,6 +90,46 @@ class Exams extends MY_Controller
 		$this->load->view('pages/exam/select_class', $data);
 	}
 
+
+	public function class_exams()
+	{
+		$stationId = $this->session->userdata('station_id');
+		// echo "station id  = ".$stationId;
+		$studentId = $this->session->userdata('user_id');
+		$classId = $this->db->select('classId')->where('stationId', $stationId)->where('isDeleted', 0)->where('studentId', $studentId)->get('tbl_students')->row()->classId;
+		/* -----------------------------
+           FETCH EXAMS
+        ------------------------------*/
+		$this->db->select('
+            e.examTitle,
+            e.examType,
+            e.examDate,
+            e.resultDate,
+            e.duration,
+            e.totalMarks,
+            e.passingMarks,
+            e.obtainedMarks,
+            e.examStatus,
+            e.weightage,
+            s.subjectName
+        ');
+		$this->db->from('tbl_exams e');
+		$this->db->join('tbl_subjects s', 's.subjectId = e.subjectId AND s.isDeleted=0', 'left');
+		$this->db->where([
+			'e.stationId' => $stationId,
+			'e.classId'   => $classId,
+			'e.isDeleted' => 0
+		]);
+		$this->db->order_by('e.examDate', 'ASC');
+
+		$exams = $this->db->get()->result_array();
+
+		$data['exams']   = $exams;
+		$data['classId'] = $classId;
+
+		$this->load->view('pages/student/dashboard_student_exams', $data);
+	}
+
 	public function view_exam($examId = '')
 	{
 		$UserId = '';
@@ -116,12 +164,20 @@ class Exams extends MY_Controller
 
 		$all_exam_types = [];
 		$all_education_types = [];
+		$examStatus = [];
 
 		$query = $this->db->query("SHOW COLUMNS FROM tbl_exams LIKE 'examType'");
 		$row = $query->row();
 		if ($row) {
 			$enum = str_replace(["enum(", ")", "'"], "", $row->Type);
 			$all_exam_types = explode(",", $enum);
+		}
+
+		$query = $this->db->query("SHOW COLUMNS FROM tbl_exams LIKE 'examStatus'");
+		$row = $query->row();
+		if ($row) {
+			$enum = str_replace(["enum(", ")", "'"], "", $row->Type);
+			$examStatus = explode(",", $enum);
 		}
 
 		$query = $this->db->query("SHOW COLUMNS FROM tbl_exams LIKE 'educationType'");
@@ -136,6 +192,7 @@ class Exams extends MY_Controller
 		$data['all_exam_types'] = $all_exam_types;
 		$data['all_education_types'] = $all_education_types;
 		$data['all_subjects'] = $all_subjects;
+		$data['examStatus'] = $examStatus;
 
 		// echo "<br>";
 		// echo "<pre>";
@@ -199,14 +256,14 @@ class Exams extends MY_Controller
 		// Admission
 		$this->form_validation->set_rules('exam_title', 'exam_title', 'required');
 		$this->form_validation->set_rules('exam_type', 'exam_type', 'required');
-		$this->form_validation->set_rules('education_type', 'education_type', 'required');
+		// $this->form_validation->set_rules('education_type', 'education_type', 'required');
 		$this->form_validation->set_rules('subject', 'subject', 'required');
 		$this->form_validation->set_rules('exam_date', 'exam_date', 'required');
 		$this->form_validation->set_rules('result_date', 'result_date', 'required');
 		$this->form_validation->set_rules('duration_minutes', 'duration_minutes', 'required');
 		$this->form_validation->set_rules('total_marks', 'total_marks', 'required');
 		$this->form_validation->set_rules('passing_marks', 'passing_marks', 'required');
-		$this->form_validation->set_rules('weightage', 'weightage', 'required');
+		// $this->form_validation->set_rules('weightage', 'weightage', 'required');
 
 		if ($this->form_validation->run() == FALSE) {
 			$Response['message']  = validation_errors();
@@ -214,6 +271,7 @@ class Exams extends MY_Controller
 			return;
 		} else {
 
+			$examId = $this->input->post('examId') ?? '';
 			$exam_title = $this->input->post('exam_title') ?? '';
 			$classId = $this->input->post('classId') ?? '';
 			$exam_type = $this->input->post('exam_type') ?? '';
@@ -225,6 +283,8 @@ class Exams extends MY_Controller
 			$total_marks = $this->input->post('total_marks') ?? '';
 			$passing_marks = $this->input->post('passing_marks') ?? '';
 			$weightage = $this->input->post('weightage') ?? '';
+			$obtainedMarks = $this->input->post('obtainedMarks') ?? '';
+			$examStatus = $this->input->post('examStatus') ?? '';
 
 			$data = array();
 
@@ -251,9 +311,6 @@ class Exams extends MY_Controller
 
 			switch ($case) {
 
-				// =======================
-				// ADD CASE
-				// =======================
 				case 'add':
 
 					$this->db->insert('tbl_exams', $data);
@@ -263,12 +320,25 @@ class Exams extends MY_Controller
 					}
 
 					break;
+
+				case 'edit':
+
+					$data['obtainedMarks'] = floatval($obtainedMarks);
+					$data['examStatus'] = $examStatus;
+
+					// print_r($data);
+					// die();
+					$this->db->where('examId', $examId)->where('stationId', $StationId)->where('isDeleted', 0)->update('tbl_exams', $data);
+					if ($this->db->affected_rows() > 0) {
+						$Response['status']  = true;
+						$Response['message']  = "Exam Updated Successfully";
+					}
+
+					break;
 			}
 
-			// if ($check_parents == true && $check_sibling == true && $check_students == true) {
 			exit(json_encode($Response));
 			return;
-			// }
 		}
 		exit(json_encode($Response));
 	}

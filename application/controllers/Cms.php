@@ -134,7 +134,127 @@ class Cms extends MY_Controller
 	{
 		switch ($case) {
 			case 'Admin':
-				$this->load->view('pages/admin/dashboard');
+
+				$db = $this->db; // CI DB instance
+
+				/* =======================
+				KPI COUNTS
+				======================= */
+				$data['students_count'] = $db->where('isDeleted', 0)->count_all_results('tbl_students');
+
+				$data['admissions_count'] = $db->where('isDeleted', 0)->count_all_results('tbl_admissions');
+
+				$data['classes_count'] = $db->where('isDeleted', 0)->count_all_results('tbl_classes');
+
+				$data['fees_paid'] = $db->select_sum('paidAmount')
+					->where('isDeleted', 0)
+					->get('tbl_fees')
+					->row()->paidAmount ?? 0;
+
+				$data['fees_due'] = $db->select_sum('dueAmount')
+					->where('isDeleted', 0)
+					->get('tbl_fees')
+					->row()->dueAmount ?? 0;
+
+				$data['expenses'] = $db->select_sum('amount')
+					->where('isDeleted', 0)
+					->get('tbl_expenses')
+					->row()->amount ?? 0;
+
+				/* =======================
+				TASK STATUS
+				======================= */
+				$data['task_stats'] = [
+					'Pending'     => $db->where(['status' => 'Pending', 'isDeleted' => 0])->count_all_results('tbl_tasks'),
+					'In Progress' => $db->where(['status' => 'In Progress', 'isDeleted' => 0])->count_all_results('tbl_tasks'),
+					'Completed'   => $db->where(['status' => 'Completed', 'isDeleted' => 0])->count_all_results('tbl_tasks'),
+					'Overdue'     => $db->where(['status' => 'Overdue', 'isDeleted' => 0])->count_all_results('tbl_tasks')
+				];
+
+				/* =======================
+				EXAMS STATUS
+				======================= */
+				$data['exam_stats'] = [
+					'Scheduled' => $db->where(['examStatus' => 'Scheduled', 'isDeleted' => 0])->count_all_results('tbl_exams'),
+					'Ongoing'   => $db->where(['examStatus' => 'Ongoing', 'isDeleted' => 0])->count_all_results('tbl_exams'),
+					'Completed' => $db->where(['examStatus' => 'Completed', 'isDeleted' => 0])->count_all_results('tbl_exams'),
+					'Results'   => $db->where(['examStatus' => 'Result Published', 'isDeleted' => 0])->count_all_results('tbl_exams')
+				];
+
+				/* =======================
+				ATTENDANCE % (TODAY)
+				======================= */
+				$total_att = $db->where(['isDeleted' => 0, 'attendanceDate' => date('Y-m-d')])
+					->count_all_results('tbl_attendance');
+
+				$present_att = $db->where([
+					'isDeleted' => 0,
+					'attendanceDate' => date('Y-m-d'),
+					'status' => 'Present'
+				])->count_all_results('tbl_attendance');
+
+				$data['attendance_percent'] = ($total_att > 0)
+					? round(($present_att / $total_att) * 100, 1)
+					: 0;
+
+				/* =======================
+				ADMISSION TREND (MONTHLY)
+				======================= */
+				$trend = $db->query("
+					SELECT DATE_FORMAT(admissionDate,'%b') AS m, COUNT(*) c
+					FROM tbl_admissions
+					WHERE isDeleted=0
+					GROUP BY MONTH(admissionDate)
+					ORDER BY MONTH(admissionDate)
+				")->result_array();
+
+				$data['admission_labels'] = array_column($trend, 'm');
+				$data['admission_data']   = array_column($trend, 'c');
+
+				/* =======================
+				FINANCE TREND
+				======================= */
+				$finance = $db->query("
+					SELECT DATE_FORMAT(dueDate,'%b') AS m,
+							SUM(paidAmount) fees,
+							(SELECT SUM(amount) FROM tbl_expenses e
+							WHERE MONTH(e.expenseDate)=MONTH(f.dueDate)) exp
+					FROM tbl_fees f
+					WHERE isDeleted=0
+					GROUP BY MONTH(dueDate)
+				")->result_array();
+
+				$data['finance_labels']   = array_column($finance, 'm');
+				$data['fees_data']        = array_map(fn($r) => $r['fees'] ?? 0, $finance);
+				$data['expense_data']     = array_map(fn($r) => $r['exp'] ?? 0, $finance);
+
+				/* =======================
+					TASK PIE
+				======================= */
+				$data['task_chart'] = array_values($data['task_stats']);
+
+				/* =======================
+					ATTENDANCE TREND (WEEK)
+				======================= */
+				$att_trend = $db->query("
+					SELECT DAYNAME(attendanceDate) d,
+							ROUND(SUM(status='Present')/COUNT(*)*100,1) p
+					FROM tbl_attendance
+					WHERE isDeleted=0
+					GROUP BY attendanceDate
+					ORDER BY attendanceDate DESC
+					LIMIT 6
+				")->result_array();
+
+				$data['att_labels'] = array_column($att_trend, 'd');
+				$data['att_data']   = array_column($att_trend, 'p');
+
+				// echo "<br>";
+				// echo "<pre>";
+				// print_r($data);
+				// die();
+
+				$this->load->view('pages/admin/dashboard', $data);
 				break;
 
 			case 'Teacher':

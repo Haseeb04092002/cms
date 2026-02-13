@@ -77,61 +77,6 @@
         <h3 class="fw-bold">Student Attendance (<?= $className ?> <?= $sectionName ?> )</h3>
     </div>
 
-    <!-- Search Student -->
-    <div class="card mb-4">
-        <div class="card-header bg-white">
-            <h5 class="mb-0">Search Student</h5>
-        </div>
-        <div class="card-body">
-            <form id="FindStudentForm" data-parsley-validate>
-                <div class="row g-3">
-
-                    <div class="col-md-4">
-                        <label class="form-label">Education Type</label>
-                        <select class="form-select" name="education_type" required data-parsley-required-message="Education Type is required">
-                            <option value="">-- Select --</option>
-
-                            <?php if (!empty($all_education_type)): ?>
-                                <?php foreach ($all_education_type as $type): ?>
-                                    <option value="<?= $type ?>"
-                                        <?= (!empty($student->education_type) && $student->education_type == $type) ? 'selected' : '' ?>>
-                                        <?= $type ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-
-                        </select>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label">Student Name</label>
-                        <input type="text" class="form-control" name="student_name" data-parsley-required-message="Student Name is required">
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label">Class</label>
-                        <select class="form-select" name="class_section" required data-parsley-required-message="Class & Section is required">
-                            <option value="">--Select--</option>
-                            <?php if (!empty($all_classes)): ?>
-                                <?php foreach ($all_classes as $type): ?>
-                                    <option value="<?= $type->classId ?>"
-                                        <?= (!empty($student->classId) && $student->classId == $type->classId) ? 'selected' : '' ?>>
-                                        <?= $type->className ?> <?= $type->sectionName ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </select>
-                    </div>
-
-                </div>
-
-                <button class="btn btn-primary mt-3" type="submit">Search</button>
-                <button class="btn btn-primary mt-3 ms-3" type="reset" id="resetBtn">Reset</button>
-
-            </form>
-        </div>
-    </div>
-
 
     <div class="card">
         <div class="card-body p-0">

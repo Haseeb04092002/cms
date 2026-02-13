@@ -92,7 +92,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
                 <!-- Logo -->
                 <div class="text-center mb-4">
-                    <img src="<?= base_url('assets/img/logo.png') ?>" alt="Company Logo" class="login-logo">
+                    <img src="<?= base_url('assets/img/schoolium-logo.png') ?>" alt="Company Logo" class="login-logo">
                     <h3 class="mt-3 fw-bold">Welcome Back</h3>
                     <p class="text-muted small">Please login to your account</p>
                 </div>

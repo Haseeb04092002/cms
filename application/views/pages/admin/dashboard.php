@@ -1,220 +1,204 @@
 <div class="p-4">
 
-  <!-- ================= KPI CARDS ================= -->
+  <!-- KPI -->
   <div class="row g-3 mb-3">
-
-    <div class="col-6 col-lg-2">
-      <div class="card shadow-sm">
+    <div class="col-lg-2 col-6">
+      <div class="card">
         <div class="card-body">
           <div class="text-muted small">Students</div>
-          <div class="fs-4 fw-bold">2480</div>
+          <div class="fs-4 fw-bold"><?= $students_count ?? '' ?></div>
         </div>
       </div>
     </div>
 
-    <div class="col-6 col-lg-2">
-      <div class="card shadow-sm">
+    <div class="col-lg-2 col-6">
+      <div class="card">
         <div class="card-body">
           <div class="text-muted small">Admissions</div>
-          <div class="fs-4 fw-bold">420</div>
+          <div class="fs-4 fw-bold"><?= $admissions_count ?? '' ?></div>
         </div>
       </div>
     </div>
 
-    <div class="col-6 col-lg-2">
-      <div class="card shadow-sm">
+    <div class="col-lg-2 col-6">
+      <div class="card">
         <div class="card-body">
           <div class="text-muted small">Classes</div>
-          <div class="fs-4 fw-bold">48</div>
+          <div class="fs-4 fw-bold"><?= $classes_count ?? '' ?></div>
         </div>
       </div>
     </div>
 
-    <div class="col-6 col-lg-2">
-      <div class="card shadow-sm">
+    <div class="col-lg-2 col-6">
+      <div class="card">
         <div class="card-body">
           <div class="text-muted small">Fees Paid</div>
-          <div class="fs-4 fw-bold text-success">₨ 4.2M</div>
+          <div class="fs-4 fw-bold text-success"><?= $fees_paid ?? '' ?></div>
         </div>
       </div>
     </div>
 
-    <div class="col-6 col-lg-2">
-      <div class="card shadow-sm">
+    <div class="col-lg-2 col-6">
+      <div class="card">
         <div class="card-body">
           <div class="text-muted small">Fee Dues</div>
-          <div class="fs-4 fw-bold text-danger">₨ 1.1M</div>
+          <div class="fs-4 fw-bold text-danger"><?= $fees_due ?? '' ?></div>
         </div>
       </div>
     </div>
 
-    <div class="col-6 col-lg-2">
-      <div class="card shadow-sm">
+    <div class="col-lg-2 col-6">
+      <div class="card">
         <div class="card-body">
           <div class="text-muted small">Expenses</div>
-          <div class="fs-4 fw-bold">₨ 1.9M</div>
+          <div class="fs-4 fw-bold"><?= $expenses ?? '' ?></div>
         </div>
       </div>
     </div>
-
   </div>
 
-  <!-- ================= STATUS ROW ================= -->
+  <!-- STATUS -->
   <div class="row g-3 mb-3">
-
-    <div class="col-lg-3 col-md-6 col-12">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h6 class="fw-bold">Student Tasks</h6>
-          <ul class="list-group list-group-flush small">
-            <li class="list-group-item d-flex justify-content-between">Pending <span class="badge bg-warning">34</span></li>
-            <li class="list-group-item d-flex justify-content-between">In Progress <span class="badge bg-primary">21</span></li>
-            <li class="list-group-item d-flex justify-content-between">Completed <span class="badge bg-success">128</span></li>
-            <li class="list-group-item d-flex justify-content-between">Overdue <span class="badge bg-danger">7</span></li>
-          </ul>
+    <?php if (isset($task_stats)): ?>
+      <?php foreach ($task_stats as $k => $v): ?>
+        <div class="col-lg-3 col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h6><?= $k ?></h6>
+              <span class="badge bg-dark"><?= $v ?></span>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6 col-12">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h6 class="fw-bold">Exams & Results</h6>
-          <ul class="list-group list-group-flush small">
-            <li class="list-group-item d-flex justify-content-between">Scheduled <span class="badge bg-info">6</span></li>
-            <li class="list-group-item d-flex justify-content-between">Ongoing <span class="badge bg-primary">2</span></li>
-            <li class="list-group-item d-flex justify-content-between">Completed <span class="badge bg-success">14</span></li>
-            <li class="list-group-item d-flex justify-content-between">Results Published <span class="badge bg-dark">10</span></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6 col-12">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h6 class="fw-bold">Attendance</h6>
-          <ul class="list-group list-group-flush small">
-            <li class="list-group-item d-flex justify-content-between">Present <span class="badge bg-success">93%</span></li>
-            <li class="list-group-item d-flex justify-content-between">Absent <span class="badge bg-danger">5%</span></li>
-            <li class="list-group-item d-flex justify-content-between">Late <span class="badge bg-warning">2%</span></li>
-            <li class="list-group-item d-flex justify-content-between">Defaulters <span class="badge bg-dark">84</span></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6 col-12">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h6 class="fw-bold">Parents Messages</h6>
-          <ul class="list-group list-group-flush small">
-            <li class="list-group-item d-flex justify-content-between">Unread <span class="badge bg-danger">18</span></li>
-            <li class="list-group-item d-flex justify-content-between">Open <span class="badge bg-warning">12</span></li>
-            <li class="list-group-item d-flex justify-content-between">In Progress <span class="badge bg-primary">9</span></li>
-            <li class="list-group-item d-flex justify-content-between">Resolved <span class="badge bg-success">146</span></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
+      <?php endforeach; ?>
+    <?php endif; ?>
   </div>
 
-  <!-- ================= GRAPHS ================= -->
-  <div class="row g-3">
+  <script>
+    // declare chart variables globally (once)
+    let admissionChart = null;
+    let financeChart = null;
+    let tasksChart = null;
+    let attendanceChart = null;
 
-    <div class="col-lg-6 col-12">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h6 class="fw-bold">Admissions Trend</h6>
-          <canvas id="admissionChart"></canvas>
-        </div>
-      </div>
-    </div>
+    document.addEventListener("DOMContentLoaded", function() {
 
-    <div class="col-lg-6 col-12">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h6 class="fw-bold">Fees vs Expenses</h6>
-          <canvas id="financeChart"></canvas>
-        </div>
-      </div>
-    </div>
+      /* ======================
+         ADMISSION CHART
+      ====================== */
+      let admCanvas = document.getElementById('admissionChart');
+      if (admCanvas) {
 
-    <div class="col-lg-6 col-12">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h6 class="fw-bold">Student Tasks Distribution</h6>
-          <canvas id="tasksChart"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-6 col-12">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h6 class="fw-bold">Attendance Trend</h6>
-          <canvas id="attendanceChart"></canvas>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-</div>
-
-<script>
-  new Chart(document.getElementById('admissionChart'), {
-    type: 'line',
-    data: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-      datasets: [{
-        label: 'Admissions',
-        data: [120, 180, 260, 310, 380, 420],
-        fill: false,
-        tension: 0.3
-      }]
-    }
-  });
-
-  new Chart(document.getElementById('financeChart'), {
-    type: 'bar',
-    data: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-      datasets: [{
-          label: 'Fees',
-          data: [600, 700, 850, 900, 980, 1100]
-        },
-        {
-          label: 'Expenses',
-          data: [300, 350, 420, 460, 500, 540]
+        if (admissionChart) {
+          admissionChart.destroy();
         }
-      ]
-    }
-  });
 
-  new Chart(document.getElementById('tasksChart'), {
-    type: 'doughnut',
-    data: {
-      labels: ['Pending', 'In Progress', 'Completed', 'Overdue'],
-      datasets: [{
-        data: [34, 21, 128, 7]
-      }]
-    }
-  });
+        admissionChart = new Chart(admCanvas, {
+          type: 'line',
+          data: {
+            labels: <?= json_encode($admission_labels ?? []) ?>,
+            datasets: [{
+              label: 'Admissions',
+              data: <?= json_encode($admission_data ?? []) ?>,
+              fill: false,
+              tension: 0.3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false
+          }
+        });
+      }
 
-  new Chart(document.getElementById('attendanceChart'), {
-    type: 'line',
-    data: {
-      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-      datasets: [{
-        label: 'Attendance %',
-        data: [91, 93, 94, 92, 95, 90],
-        fill: false,
-        tension: 0.3
-      }]
-    }
-  });
-</script>
+      /* ======================
+         FINANCE CHART
+      ====================== */
+      const finCanvas = document.getElementById('financeChart');
+      if (finCanvas) {
 
-<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> -->
+        if (financeChart) {
+          financeChart.destroy();
+        }
+
+        financeChart = new Chart(finCanvas, {
+          type: 'bar',
+          data: {
+            labels: <?= json_encode($finance_labels ?? []) ?>,
+            datasets: [{
+                label: 'Fees',
+                data: <?= json_encode($fees_data ?? []) ?>
+              },
+              {
+                label: 'Expenses',
+                data: <?= json_encode($expense_data ?? []) ?>
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false
+          }
+        });
+      }
+
+      /* ======================
+         TASKS CHART
+      ====================== */
+      const taskCanvas = document.getElementById('tasksChart');
+      if (taskCanvas) {
+
+        if (tasksChart) {
+          tasksChart.destroy();
+        }
+
+        tasksChart = new Chart(taskCanvas, {
+          type: 'doughnut',
+          data: {
+            labels: <?= json_encode(array_keys($task_stats ?? [])) ?>,
+            datasets: [{
+              data: <?= json_encode($task_chart ?? []) ?>
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false
+          }
+        });
+      }
+
+      /* ======================
+         ATTENDANCE CHART
+      ====================== */
+      const attCanvas = document.getElementById('attendanceChart');
+      if (attCanvas) {
+
+        if (attendanceChart) {
+          attendanceChart.destroy();
+        }
+
+        attendanceChart = new Chart(attCanvas, {
+          type: 'line',
+          data: {
+            labels: <?= json_encode($att_labels ?? []) ?>,
+            datasets: [{
+              label: 'Attendance %',
+              data: <?= json_encode($att_data ?? []) ?>,
+              fill: false,
+              tension: 0.3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                min: 0,
+                max: 100
+              }
+            }
+          }
+        });
+      }
+
+    });
+  </script>

@@ -6,6 +6,140 @@ use Dompdf\Options;
 
 class Student extends MY_Controller
 {
+
+    public function admission_requests()
+    {
+        $UserId    = $this->session->userdata('user_id') ?? '';
+        $UserName  = $this->session->userdata('user_name') ?? '';
+        $UserEmail = $this->session->userdata('user_email') ?? '';
+        $UserRole  = $this->session->userdata('user_role') ?? '';
+        $StationId = $this->session->userdata('station_id') ?? '';
+
+        $this->db->select('
+			s.*,
+			s.education_type AS student_education_type,
+
+            p.fatherName,
+            p.motherName,
+            p.guardianName,
+            p.parentId,
+            p.address,
+            p.contactNo,
+            p.contactNo2,
+
+			c.className,
+			c.sectionName,
+
+			d.documentPath
+		');
+
+        $this->db->from('tbl_students s');
+
+        /* Class */
+        $this->db->join(
+            'tbl_classes c',
+            'c.classId = s.classId',
+            'left'
+        );
+
+        /* Parent (FIXED) */
+        $this->db->join(
+            'tbl_parents p',
+            'p.admissionNo = s.admissionNo
+            AND p.stationId = ' . $this->db->escape($StationId) . '
+            AND p.isDeleted = 0',
+            'left'
+        );
+
+        /* Student profile image */
+        $this->db->join(
+            'tbl_documents d',
+            's.admissionNo = d.referenceId
+         AND d.referenceType = "student"
+         AND d.documentTitle = "profile_img"
+         AND d.isDeleted = 0
+         AND d.stationId = ' . $this->db->escape($StationId),
+            'left'
+        );
+
+        $this->db->where('s.stationId', $StationId);
+        $this->db->where('s.status', 'pending');
+        $this->db->where('s.isDeleted', 0);
+
+        $this->db->order_by('s.addedOn', 'DESC');
+
+        $all_students = $this->db->get()->result();
+
+        $query = $this->db->query("SHOW COLUMNS FROM tbl_students LIKE 'education_type'");
+        $row = $query->row();
+        $all_education_type = [];
+        if ($row) {
+            $enum = str_replace(["enum(", ")", "'"], "", $row->Type);
+            $all_education_type = explode(",", $enum);
+        }
+
+        $query = $this->db->query("SHOW COLUMNS FROM tbl_students LIKE 'batchYear'");
+        $row = $query->row();
+        $all_batch_year = [];
+        if ($row) {
+            $enum = str_replace(["enum(", ")", "'"], "", $row->Type);
+            $all_batch_year = explode(",", $enum);
+        }
+
+        $all_classes = $this->db->select('classId, className, sectionName')->where('stationId', $StationId)->where('isDeleted', 0)->order_by('addedOn', 'DESC')->get('tbl_classes')->result();
+
+        $data['all_students'] = $all_students;
+        $data['all_education_type'] = $all_education_type;
+        $data['all_batch_year'] = $all_batch_year;
+        $data['all_classes'] = $all_classes;
+
+        // echo "<br>";
+        // echo "<pre>";
+        // print_r($data['all_students']);
+        // die();
+
+        $this->load->view('pages/student/admission_requests', $data);
+    }
+
+
+
+    public function updated_admission_requests()
+    {
+        $StationId = $this->session->userdata('station_id') ?? '';
+        $rows = json_decode($this->input->post('rows'), true);
+        // echo "<pre>";
+        // print_r($rows);
+        // echo "</pre>";
+        // die();
+
+        $Response['status']  = false;
+        $Response['message']  = "Some Error Occured. Try Again";
+
+        foreach ($rows as $row) {
+            $update = [
+                'status'         => $row['status'],
+                'addedBy' => $this->session->userdata('user_id'),
+                'addedOn'        => date('Y-m-d H:i:s'),
+                'isDeleted'      => 0
+            ];
+
+            $this->db->where('studentId', $row['studentId']);
+            $this->db->where('isDeleted', 0);
+            $this->db->where('stationId', $StationId);
+            $this->db->update('tbl_students', $update);
+        }
+
+        if ($this->db->affected_rows() > 0) {
+            $Response['status']  = true;
+            $Response['message']  = "Admission Requests Updated Successfully";
+            exit(json_encode($Response));
+            return;
+        }
+
+        exit(json_encode($Response));
+    }
+
+
     public function admission()
     {
         $UserId = '';
@@ -20,7 +154,6 @@ class Student extends MY_Controller
         $StationId = $this->session->userdata('station_id') ?? '';
         // Create a new DateTime object for the current time
         $date = new DateTime();
-        // Format the date using the format() method
         $date = $date->format('His');
 
         $query = $this->db->query("SHOW COLUMNS FROM tbl_students LIKE 'gender'");
@@ -877,6 +1010,7 @@ class Student extends MY_Controller
         );
 
         $this->db->where('s.stationId', $StationId);
+        $this->db->where('s.status', 'approved');
         $this->db->where('s.isDeleted', 0);
 
         $this->db->order_by('s.addedOn', 'DESC');

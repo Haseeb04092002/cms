@@ -8,6 +8,63 @@ class Tasks extends MY_Controller
 		$this->load->view('pages/task/task_assingment');
 	}
 
+
+	public function student_all_tasks()
+	{
+		$UserId = '';
+		$UserName = '';
+		$UserEmail = '';
+		$UserRole = '';
+		$StationId = '';
+		$UserId = $this->session->userdata('user_id') ?? '';
+		$UserName = $this->session->userdata('user_name') ?? '';
+		$UserEmail = $this->session->userdata('user_email') ?? '';
+		$UserRole = $this->session->userdata('user_role') ?? '';
+		$StationId = $this->session->userdata('station_id') ?? '';
+
+		if ($UserRole === 'Student') {
+			$this->db->select('
+				t.*,
+				s.firstName,
+				s.lastName,
+				s.education_type As student_education_type,
+				c.className,
+				c.sectionName
+			');
+			$this->db->from('tbl_tasks t');
+			/* Class */
+			$this->db->join(
+				'tbl_classes c',
+				'c.classId = t.classId',
+				'left'
+			);
+			/* Student */
+			$this->db->join(
+				'tbl_students s',
+				's.studentId = t.studentId',
+				'left'
+			);
+
+			$this->db->where('t.studentId', $UserId);
+			$this->db->where('t.stationId', $StationId);
+			$this->db->where('t.isDeleted', 0);
+
+			$this->db->order_by('t.addedOn', 'DESC');
+
+			$all_tasks = $this->db->get()->result();
+
+			$all_classes = $this->db->select('classId, className, sectionName')->where('stationId', $StationId)->where('isDeleted', 0)->get('tbl_classes')->result();
+
+			$data = array();
+			$data['all_tasks'] = $all_tasks;
+			$data['all_classes'] = $all_classes;
+			$this->load->view('pages/student/dashboard_student_task', $data);
+
+			// $all_classes = $this->db->where('stationId', $StationId)->where('isDeleted', 0)->order_by('addedOn', 'DESC')->get('tbl_classes')->result();
+			// $data['all_classes'] = $all_classes;
+		}
+	}
+
 	public function upload_task($case = 'student', $userId = '')
 	{
 		switch ($case) {

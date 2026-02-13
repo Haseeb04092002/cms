@@ -110,7 +110,7 @@ $student_img = $this->db
                         </div>
 
                         <!-- ACTION BUTTONS -->
-                        <div class="profile-actions d-grid gap-2 mt-4">
+                        <div class="<?= ($UserRole === "Student")?'d-none':'d-block' ?> profile-actions d-grid gap-2 mt-4">
 
                             <button class="btn btn-outline-secondary"
                                 data-bs-toggle="modal"

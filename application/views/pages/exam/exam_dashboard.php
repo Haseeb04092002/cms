@@ -89,11 +89,11 @@
                             </a>
 
                             <!-- Create For Student -->
-                            <a href="<?= site_url('Exams/create_exam_for_student') ?>"
+                            <!-- <a href="<?= site_url('Exams/create_exam_for_student') ?>"
                                 class="btn btn-success btn-lg navigator" data-bs-dismiss="modal">
                                 <i class="bi bi-person-fill me-2"></i>
                                 Create for Student
-                            </a>
+                            </a> -->
 
                         </div>
 

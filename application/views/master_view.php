@@ -74,12 +74,12 @@
             color: var(--blue-color);
         }
 
-        .navbar img {
+        /* .navbar img {
             width: 60px;
             height: 60px;
             object-fit: cover;
             border-radius: 50%;
-        }
+        } */
 
         .search_bar {
             height: 47px;
@@ -389,7 +389,7 @@
             }
 
             currUrl = url;
-            console.log("currUrl == " + currUrl);
+            console.log("currUrl navigator == " + currUrl);
             $("#pageContent").load(currUrl);
         });
 
@@ -398,7 +398,7 @@
             e.preventDefault();
 
             if (currUrl) {
-                console.log("currUrl == " + currUrl);
+                console.log("currUrl refresh == " + currUrl);
                 $("#pageContent").load(currUrl);
             }
         });
@@ -410,7 +410,7 @@
             if (historyStack.length > 0) {
                 forwardStack.push(currUrl); // save current for forward
                 currUrl = historyStack.pop(); // go back
-                console.log("currUrl == " + currUrl);
+                console.log("currUrl back == " + currUrl);
                 $("#pageContent").load(currUrl);
             }
         });
@@ -422,7 +422,7 @@
             if (forwardStack.length > 0) {
                 historyStack.push(currUrl); // save current for back
                 currUrl = forwardStack.pop(); // go forward
-                console.log("currUrl == " + currUrl);
+                console.log("currUrl forward == " + currUrl);
                 $("#pageContent").load(currUrl);
             }
         });

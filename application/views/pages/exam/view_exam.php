@@ -10,6 +10,7 @@
                 <div class="row g-3">
 
                     <input type="hidden" value="<?= $exam->classId ?>" name="classId">
+                    <input type="hidden" value="<?= $exam->examId ?>" name="examId">
 
                     <!-- Exam Title -->
                     <div class="col-md-4">
@@ -156,6 +157,35 @@
                             data-parsley-required-message="Weightage is required">
                     </div>
 
+                    <!-- Obtained Marks -->
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Obtained Marks</label>
+                        <input type="number"
+                            step="0.01"
+                            name="obtainedMarks"
+                            class="form-control exam-field"
+                            value="<?= (!empty($exam->obtainedMarks)) ? $exam->obtainedMarks : '' ?>"
+                            readonly>
+                    </div>
+
+                    <!-- Exam Status -->
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Exam Status</label>
+                        <select class="form-select"
+                            name="examStatus"
+                            readonly>
+                            <option value="">-- Select --</option>
+                            <?php if (!empty($examStatus)): ?>
+                                <?php foreach ($examStatus as $type): ?>
+                                    <option value="<?= $type ?>"
+                                        <?= (!empty($exam->examStatus) && $exam->examStatus == $type) ? 'selected' : '' ?>>
+                                        <?= $type ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+
                     <!-- Instructions -->
                     <div class="col-md-12">
                         <label class="form-label fw-semibold">Exam Instructions</label>
@@ -241,7 +271,7 @@
             }
 
             $.ajax({
-                url: "<?= site_url('Exams/save_exam/add') ?>",
+                url: "<?= site_url('Exams/save_exam/edit') ?>",
                 type: "POST",
                 data: new FormData(this),
                 dataType: "json",

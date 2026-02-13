@@ -164,6 +164,63 @@ class Timetable extends MY_Controller
 		$this->load->view('pages/timetable/all_time_tables', $data);
 	}
 
+	public function student_time_table()
+	{
+		$stationId = $this->session->userdata('station_id');
+		// echo "station id  = ".$stationId;
+		$studentId = $this->session->userdata('user_id');
+        $classId = $this->db->select('classId')->where('stationId', $stationId)->where('isDeleted', 0)->where('studentId', $studentId)->get('tbl_students')->row()->classId;
+		// print_r($this->db->last_query());
+
+		$this->db->select('
+            tt.dayName,
+            tt.periodNo,
+            tt.startTime,
+            tt.endTime,
+            s.subjectName,
+            st.firstName,
+            st.lastName
+        ');
+		$this->db->from('tbl_time_table tt');
+		$this->db->join('tbl_subjects s', 's.subjectId = tt.subjectId AND s.isDeleted=0', 'left');
+		$this->db->join('tbl_staff st', 'st.staffId = tt.teacherId AND st.isDeleted=0', 'left');
+		$this->db->where([
+			'tt.stationId' => $stationId,
+			'tt.classId'   => $classId,
+			'tt.isDeleted' => 0
+		]);
+		$this->db->order_by('tt.periodNo, tt.startTime');
+
+		$rows = $this->db->get()->result_array();
+
+		$days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+		$periods = [];
+		$table   = [];
+
+		foreach ($rows as $r) {
+
+			$periodKey = $r['periodNo'] . '|' . $r['startTime'] . '-' . $r['endTime'];
+			$periods[$periodKey] = [
+				'periodNo' => $r['periodNo'],
+				'time'     => $r['startTime'] . ' - ' . $r['endTime']
+			];
+
+			$table[$r['periodNo']][$r['dayName']] = $r;
+		}
+
+		ksort($periods);
+
+		$data = [
+			'days'    => $days,
+			'periods' => $periods,
+			'table'   => $table,
+			'classId' => $classId
+		];
+
+		$this->load->view('pages/student/dashboard_student_time_table', $data);
+	}
+
 	public function time_table_dashboard()
 	{
 		$this->load->view('pages/timetable/dashboard');
