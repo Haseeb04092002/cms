@@ -14,21 +14,20 @@ class MY_Controller extends CI_Controller
 
         // Get current controller
         $controller = strtolower($this->router->class);
-        redirect('login');
 
         // Allow login controllers without redirect
-        // $auth_controllers = ['login', 'pwa'];
+        $auth_controllers = ['login', 'pwa'];
 
-        // if (!$is_logged_in && !in_array($controller, $auth_controllers)) {
+        if (!$is_logged_in && !in_array($controller, $auth_controllers)) {
 
-        //     $this->session->sess_destroy();
+            $this->session->sess_destroy();
 
-        //     // if ($is_mobile) {
-        //         // redirect('pwa/login');
-        //     // } else {
-        //         redirect('login');
-        //     // }
-        // }
+            // if ($is_mobile) {
+                // redirect('pwa/login');
+            // } else {
+                redirect('login');
+            // }
+        }
     }
 
     // public function __construct()
