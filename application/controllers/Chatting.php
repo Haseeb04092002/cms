@@ -1,0 +1,437 @@
+<?php
+defined('BASEPATH') or exit('No direct script access allowed');
+
+class Chatting extends MY_Controller
+{
+
+	public function index()
+	{
+		$this->output->set_header('X-Page-Title: Chatting');
+		$this->load->view('pages/chatting/chats');
+	}
+
+	public function open_chat($otherUserId, $otherRoleId)
+	{
+		$UserId    = (int)$this->session->userdata('user_id');
+		$UserRole  = (int)$this->session->userdata('user_role');
+		$senderRoleId = (int)$this->session->userdata('user_role_id');
+		$StationId = (int)$this->session->userdata('station_id');
+
+		$otherUserId = (int)$otherUserId;
+		$otherRoleId = (int)$otherRoleId;
+
+		$messages = $this->db
+			->where('stationId', $StationId)
+			->group_start()
+			->where('senderId', $UserId)
+			->where('receiverId', $otherUserId)
+			->where('receiverRoleId', $otherRoleId)
+			->group_end()
+			->or_group_start()
+			->where('senderId', $otherUserId)
+			->where('receiverId', $UserId)
+			->where('senderRoleId', $senderRoleId)
+			->group_end()
+			->order_by('addedOn', 'ASC')
+			->get('tbl_messages')
+			->result();
+
+		// foreach ($messages as $m) {
+		// 	if ((int)$m->receiverId === $UserId) {
+
+		// 		$exists = $this->db
+		// 			->where('messageId', $m->messageId)
+		// 			->get('tbl_message_reads')
+		// 			->row();
+
+		// 		if (!$exists) {
+		// 			$this->db->insert('tbl_message_reads', [
+		// 				'stationId'  => $StationId,
+		// 				'userId'     => $UserId,
+		// 				'messageId'  => $m->messageId,
+		// 				'senderId'   => $m->senderId,
+		// 				'receiverId' => $m->receiverId,
+		// 				'receiverRoleId' => $m->receiverRoleId,
+		// 				'readOn'     => date('Y-m-d H:i:s'),
+		// 				'addedBy'    => $UserId,
+		// 				'addedOn'    => date('Y-m-d H:i:s')
+		// 			]);
+		// 		}
+		// 	}
+		// }
+		$this->output->set_header('X-Page-Title: Chatting');
+		echo json_encode($messages);
+	}
+
+
+	public function send_message()
+	{
+		$senderId     = (int)$this->session->userdata('user_id');
+		$senderRoleId = (int)$this->session->userdata('user_role_id');
+		$StationId    = (int)$this->session->userdata('station_id');
+
+		$Response['status']  = false;
+		$Response['message'] = "Some Error Occured. Try Again";
+
+		$receiverId     = (int)$this->input->post('receiverId');
+		$receiverRoleId = (int)$this->input->post('receiverRoleId');
+		$message        = $this->input->post('message');
+
+		// echo "<br>receiverId = ".$receiverId;
+		// echo "<br>receiverRoleId = ".$receiverRoleId;
+		// echo "<br>message = ".$message;
+		// die();
+
+		$this->db->insert('tbl_messages', [
+			'stationId'      => $StationId,
+			'senderId'       => $senderId,
+			'senderRoleId'   => $senderRoleId,
+			'receiverId'     => $receiverId,
+			'receiverRoleId' => $receiverRoleId,
+			'messageType'    => 'TEXT',
+			'messageText'    => $message,
+			'addedBy'        => $senderId,
+			'addedOn'        => date('Y-m-d H:i:s')
+		]);
+
+		if ($this->db->affected_rows() > 0) {
+			$Response['status']  = true;
+			$Response['message'] = "Message Sent Successfully";
+		}
+		$this->output->set_header('X-Page-Title: Chatting');
+		exit(json_encode($Response));
+	}
+
+
+	public function poll_updates()
+	{
+		$UserId    = (int)$this->session->userdata('user_id');
+		$StationId = (int)$this->session->userdata('station_id');
+
+		$unread = $this->db
+			->select('m.senderId, COUNT(m.messageId) AS total')
+			->from('tbl_messages m')
+			->join(
+				'tbl_message_reads mr',
+				'mr.messageId = m.messageId AND mr.userId = ' . $UserId,
+				'left'
+			)
+			->where('m.stationId', $StationId)
+			->where('m.receiverId', $UserId)
+			->where('mr.messageReadId IS NULL', null, false)
+			->group_by('m.senderId')
+			->get()
+			->result();
+		$this->output->set_header('X-Page-Title: Chatting');
+		echo json_encode($unread);
+	}
+
+	public function chats()
+	{
+		$UserId    = (int)$this->session->userdata('user_id');
+		$UserRole  = (int)$this->session->userdata('user_role');
+		$UserRoleId  = (int)$this->session->userdata('user_role_id');
+		$StationId = (int)$this->session->userdata('station_id');
+
+		$users = $this->db
+			->select("roleId AS roleId, userId AS profile_id, 'USER' AS profile_type, username AS name", false)
+			->where('stationId', $StationId)
+			->where('isDeleted', 0)
+			->get('tbl_users')
+			->result();
+
+		$staff = $this->db
+			->select("roleId AS roleId, staffId AS profile_id, 'STAFF' AS profile_type, CONCAT(firstName,' ',lastName) AS name", false)
+			->where('stationId', $StationId)
+			->where('isDeleted', 0)
+			->get('tbl_staff')
+			->result();
+
+		$students = $this->db
+			->select("roleId AS roleId, studentId AS profile_id, 'STUDENT' AS profile_type, CONCAT(firstName,' ',lastName) AS name", false)
+			->where('stationId', $StationId)
+			->where('isDeleted', 0)
+			->get('tbl_students')
+			->result();
+
+		$all_users = array_merge($users, $staff, $students);
+
+
+
+		$unique = [];
+		foreach ($all_users as $u) {
+			$key = $u->profile_id . '_' . $u->roleId;   // ✅ NEW UNIQUE KEY
+			$unique[$key] = $u;
+		}
+		$all_users = array_values($unique);
+
+
+
+		if (empty($all_users)) {
+			$data['chat_users'] = [];
+			$this->load->view('pages/chatting/chats', $data);
+			return;
+		}
+
+		$unread_data = $this->db
+			->select("CONCAT(m.senderId,'_',m.senderRoleId) AS chat_key, COUNT(m.messageId) AS unread_count", false)
+			->from('tbl_messages m')
+			->join('tbl_message_reads mr', 'mr.messageId=m.messageId', 'left')
+			->where('m.stationId', $StationId)
+			->where('m.receiverId', $UserId)
+			->where('m.receiverRoleId', $UserRoleId)
+			->where('m.isDeleted', 0)
+			// ->where('mr.messageReadId IS NULL', null, false)
+			->group_by('m.senderId, m.senderRoleId', false)
+			->get()
+			->result();
+
+		$unread_map = [];
+		foreach ($unread_data as $r) {
+			$unread_map[$r->chat_key] = (int)$r->unread_count;
+		}
+
+		$last_msgs = $this->db
+			->select("
+				CASE 
+					WHEN senderId = $UserId AND senderRoleId = $UserRoleId
+						THEN CONCAT(receiverId,'_',receiverRoleId)
+					ELSE CONCAT(senderId,'_',senderRoleId)
+				END AS chat_key,
+				messageText,
+				addedOn
+			", false)
+			->from('tbl_messages')
+			->where('stationId', $StationId)
+			->where("(
+				(senderId = $UserId AND senderRoleId = $UserRoleId) OR
+				(receiverId = $UserId AND receiverRoleId = $UserRoleId)
+			)", null, false)
+			->order_by('addedOn', 'DESC')
+			->get()
+			->result();
+
+		$last_msg_map = [];
+		foreach ($last_msgs as $m) {
+			if (!isset($last_msg_map[$m->chat_key])) {
+				$last_msg_map[$m->chat_key] = ['text' => $m->messageText, 'time' => $m->addedOn];
+			}
+		}
+
+		foreach ($all_users as &$u) {
+			$key = $u->profile_id . '_' . $u->roleId;
+
+			$u->chat_key     = $key; // ✅ very important for JS
+			$u->unread_count = $unread_map[$key] ?? 0;
+			$u->last_message = $last_msg_map[$key]['text'] ?? null;
+			$u->last_time    = $last_msg_map[$key]['time'] ?? null;
+		}
+
+		usort($all_users, function ($a, $b) {
+			if ($a->unread_count != $b->unread_count) {
+				return $b->unread_count - $a->unread_count;
+			}
+			return strtotime($b->last_time ?? '1970-01-01') <=> strtotime($a->last_time ?? '1970-01-01');
+		});
+
+		$data['chat_users'] = $all_users;
+
+		// echo "<br>";
+		// echo "<pre>";
+		// // print_r($this->db->last_query());
+		// print_r($data);
+		// die();
+
+		// $this->load->view('pages/chatting/chats', $data);
+		header('Content-Type: application/json');
+		echo json_encode($data);
+		exit;
+	}
+
+
+
+
+
+
+
+	public function poll_updates_with_head_teacher()
+	{
+		$UserId    = (int)$this->session->userdata('user_id');
+		$UserRoleId = (int)$this->session->userdata('user_role_id');
+		$StationId = (int)$this->session->userdata('station_id');
+
+		$unread = $this->db
+			->select('
+            CONCAT(m.senderId,"_",m.senderRoleId) AS chat_key,
+            COUNT(m.messageId) AS total
+        ', false)
+			->from('tbl_messages m')
+			->join(
+				'tbl_message_reads mr',
+				'mr.messageId = m.messageId AND mr.userId = ' . $UserId,
+				'left'
+			)
+			->where([
+				'm.stationId'       => $StationId,
+				'm.receiverId'      => $UserId,
+				'm.receiverRoleId'  => $UserRoleId,
+				'm.isDeleted'       => 0
+			])
+			->where('mr.messageReadId IS NULL', null, false)
+			->group_by('m.senderId, m.senderRoleId')
+			->get()
+			->result();
+
+		header('Content-Type: application/json');
+		echo json_encode($unread);
+		exit;
+	}
+
+	private function get_head_class_teacher()
+	{
+		$StationId   = (int)$this->session->userdata('station_id');
+		$studentId = $this->session->userdata('user_id');
+		// $HeadClassId = (int)$this->session->userdata('headClassId');
+		$classId = $this->db->select('classId')->where('stationId', $StationId)->where('isDeleted', 0)->where('studentId', $studentId)->get('tbl_students')->row()->classId;
+
+		$HeadClassId = $classId;
+
+		// if (!$StationId || !$HeadClassId) {
+		// 	return null;
+		// }
+
+		$teacher = $this->db
+			->select('
+            st.staffId   AS profile_id,
+            st.roleId    AS roleId,
+            CONCAT(st.firstName," ",st.lastName) AS name
+        ')
+			->from('tbl_class_subject_assignment a')
+			->join('tbl_staff st', 'st.staffId = a.teacherId AND st.isDeleted = 0')
+			->where([
+				'a.stationId'  => $StationId,
+				'a.headClassId' => $HeadClassId,
+				'a.isDeleted'  => 0
+			])
+			->limit(1)
+			->get()
+			->row();
+
+		if (!$teacher) {
+			return null;
+		}
+		$this->output->set_header('X-Page-Title: Chatting');
+		return (object)[
+			'roleId'        => $teacher->roleId,
+			'profile_id'    => $teacher->profile_id,
+			'profile_type'  => 'STAFF',
+			'name'          => $teacher->name
+		];
+	}
+
+	public function chats_with_head_teacher()
+	{
+		$UserId      = (int)$this->session->userdata('user_id');
+		$UserRoleId  = (int)$this->session->userdata('user_role_id');
+		$StationId   = (int)$this->session->userdata('station_id');
+
+		$users = $this->db
+			->select("roleId, userId AS profile_id, 'USER' AS profile_type, username AS name", false)
+			->where(['stationId' => $StationId, 'isDeleted' => 0])
+			->get('tbl_users')
+			->result();
+
+		$staff = $this->db
+			->select("roleId, staffId AS profile_id, 'STAFF' AS profile_type, CONCAT(firstName,' ',lastName) AS name", false)
+			->where(['stationId' => $StationId, 'isDeleted' => 0])
+			->get('tbl_staff')
+			->result();
+
+		$students = $this->db
+			->select("roleId, studentId AS profile_id, 'STUDENT' AS profile_type, CONCAT(firstName,' ',lastName) AS name", false)
+			->where(['stationId' => $StationId, 'status' => 1])
+			->get('tbl_students')
+			->result();
+
+		$all_users = array_merge($users, $staff, $students);
+
+		$head_teacher = $this->get_head_class_teacher();
+		if ($head_teacher) {
+			$all_users[] = $head_teacher;
+		}
+
+		$unique = [];
+		foreach ($all_users as $u) {
+			$key = $u->profile_id . '_' . $u->roleId;
+			$unique[$key] = $u;
+		}
+		$all_users = array_values($unique);
+
+		$unread_data = $this->db
+			->select("CONCAT(senderId,'_',senderRoleId) AS chat_key, COUNT(messageId) AS unread", false)
+			->from('tbl_messages')
+			->where([
+				'stationId'      => $StationId,
+				'receiverId'     => $UserId,
+				'receiverRoleId' => $UserRoleId,
+				'isDeleted'      => 0
+			])
+			->group_by('senderId, senderRoleId')
+			->get()
+			->result();
+
+		$unread_map = [];
+		foreach ($unread_data as $r) {
+			$unread_map[$r->chat_key] = (int)$r->unread;
+		}
+
+		$last_msgs = $this->db
+			->select("
+            CASE 
+                WHEN senderId=$UserId AND senderRoleId=$UserRoleId
+                    THEN CONCAT(receiverId,'_',receiverRoleId)
+                ELSE CONCAT(senderId,'_',senderRoleId)
+            END AS chat_key,
+            messageText,
+            addedOn
+        ", false)
+			->from('tbl_messages')
+			->where('stationId', $StationId)
+			->where("(
+            (senderId=$UserId AND senderRoleId=$UserRoleId) OR
+            (receiverId=$UserId AND receiverRoleId=$UserRoleId)
+        )", null, false)
+			->order_by('addedOn', 'DESC')
+			->get()
+			->result();
+
+		$last_map = [];
+		foreach ($last_msgs as $m) {
+			if (!isset($last_map[$m->chat_key])) {
+				$last_map[$m->chat_key] = [
+					'text' => $m->messageText,
+					'time' => $m->addedOn
+				];
+			}
+		}
+
+		foreach ($all_users as &$u) {
+			$key = $u->profile_id . '_' . $u->roleId;
+			$u->chat_key     = $key;
+			$u->unread_count = $unread_map[$key] ?? 0;
+			$u->last_message = $last_map[$key]['text'] ?? null;
+			$u->last_time    = $last_map[$key]['time'] ?? null;
+		}
+
+		usort($all_users, function ($a, $b) {
+			if ($a->unread_count != $b->unread_count) {
+				return $b->unread_count - $a->unread_count;
+			}
+			return strtotime($b->last_time ?? '1970-01-01') <=> strtotime($a->last_time ?? '1970-01-01');
+		});
+
+		header('Content-Type: application/json');
+		echo json_encode(['chat_users' => $all_users]);
+		exit;
+	}
+}

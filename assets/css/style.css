@@ -1,0 +1,22 @@
+/* *:where(*, *::before, *::after) {
+	transition-duration: 0.1s !important;
+	transition-delay: 0.1s !important;
+	animation-duration: 0.1s !important;
+	animation-delay: 0.1s !important;
+} */
+
+/* 2) Explicitly target common Bootstrap components to be safe */
+.modal .modal-dialog,
+.collapse,
+.dropdown-menu,
+.toast,
+.tooltip,
+.popover,
+.carousel-item,
+.navbar,
+.offcanvas,
+.toast,
+.alert {
+	transition-duration: 0.1s !important;
+	animation-duration: 0.1s !important;
+}

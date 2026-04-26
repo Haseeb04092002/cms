@@ -1,0 +1,363 @@
+body {
+	font-family: "Inter", sans-serif;
+	background-color: #f8f9fa;
+	/* Light grey background like sc2.jpg */
+	margin: 0;
+	overflow-x: hidden;
+}
+
+.help-section {
+	font-family: "Inter", sans-serif;
+	background-color: #ffffff;
+	padding: 60px 0;
+	/* Creates the large white space seen in the image */
+	text-align: center;
+}
+
+.help-title {
+	font-size: 3.5rem;
+	/* Matches the large display heading */
+	font-weight: 400;
+	color: #1a1a1a;
+	margin-bottom: 15px;
+}
+
+.help-subtitle {
+	font-size: 1.25rem;
+	color: #1a1a1a;
+	margin-bottom: 40px;
+	font-weight: 400;
+}
+
+/* Specific Navy Button from the image */
+.btn-work {
+	background-color: #282d3c;
+	color: #ffffff;
+	border: none;
+	border-radius: 4px;
+	padding: 14px 35px;
+	font-size: 0.85rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	transition: opacity 0.2s;
+}
+
+.btn-work:hover {
+	color: #ffffff;
+	opacity: 0.9;
+}
+
+.stats-section {
+	padding: 50px 5%;
+}
+
+.main-title {
+	font-size: 2.8rem;
+	font-weight: 500;
+	line-height: 1.2;
+	margin-bottom: 1.5rem;
+}
+
+.description-text {
+	color: #444;
+	font-size: 0.95rem;
+	line-height: 1.6;
+	max-width: 480px;
+	margin-bottom: 2rem;
+}
+
+/* The vertical divider line seen in sc4.jpg */
+.vertical-divider {
+	border-left: 1px solid #e0e0e0;
+	padding-left: 3rem;
+}
+
+.stat-number {
+	font-size: 3.5rem;
+	font-weight: 700;
+	margin-bottom: 0;
+	line-height: 1;
+}
+
+.stat-label {
+	font-size: 0.75rem;
+	color: #666;
+	margin-top: 5px;
+	max-width: 150px;
+}
+
+.learn-more-link {
+	color: #ff4d4d;
+	text-decoration: none;
+	text-transform: uppercase;
+	font-weight: 700;
+	font-size: 0.8rem;
+	border-bottom: 2px solid #ff4d4d;
+}
+
+/* Partner Section */
+.partner-heading {
+	font-size: 1.5rem;
+	font-weight: 400;
+	color: #333;
+	margin-top: 100px;
+	margin-bottom: 50px;
+}
+
+.partner-logo-row img {
+	max-height: 35px;
+	filter: grayscale(0);
+	/* Keeping original brand colors */
+	opacity: 0.9;
+}
+.services-detail-section {
+	padding: 60px 5%;
+}
+
+/* Gradient Typography */
+.text-gradient {
+	background: linear-gradient(
+		90deg,
+		#000 20%,
+		#e91e63 45%,
+		#00bcd4 65%,
+		#000 85%
+	);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	font-weight: 700;
+	display: inline-block;
+}
+
+.main-heading {
+	font-size: 3.5rem;
+	line-height: 1.1;
+	margin-top: 20px;
+	font-weight: 600;
+}
+
+.sub-heading-small {
+	font-size: 2.5rem;
+	margin-bottom: 0;
+}
+
+/* Links */
+.cta-link {
+	display: inline-block;
+	margin-top: 50px;
+	color: #ff4d4d;
+	text-decoration: none;
+	text-transform: uppercase;
+	font-weight: 600;
+	font-size: 0.85rem;
+	border-bottom: 2px solid #ff4d4d;
+	padding-bottom: 2px;
+}
+
+/* Right Column Styling */
+.service-item {
+	padding: 40px 0;
+	border-bottom: 1px solid #dee2e6;
+}
+
+.service-item:first-child {
+	padding-top: 0;
+}
+
+.service-item:last-child {
+	border-bottom: none;
+}
+
+.service-title {
+	font-size: 1.5rem;
+	font-weight: 500;
+	margin-bottom: 15px;
+}
+
+.service-text {
+	color: #555;
+	font-size: 1rem;
+	line-height: 1.6;
+	max-width: 500px;
+	margin-bottom: 20px;
+}
+
+.learn-more {
+	color: #ff4d4d;
+	text-decoration: none;
+	text-transform: uppercase;
+	font-weight: 600;
+	font-size: 0.75rem;
+	letter-spacing: 1px;
+}
+
+.learn-more i {
+	font-size: 1rem;
+	vertical-align: middle;
+}
+
+/* Back to top button snippet */
+.back-to-top {
+	position: fixed;
+	bottom: 30px;
+	right: 30px;
+	background: white;
+	border-radius: 50%;
+	width: 50px;
+	height: 50px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+	color: #ff4d4d;
+	text-decoration: none;
+}
+
+.logo-partners {
+	width: 80px;
+}
+.hero-section {
+	border-radius: 0 !important;
+}
+
+/* 🔹 MOBILE ONLY — Desktop remains unchanged */
+@media (max-width: 768px) {
+	/* Fix 100vh issue on mobile browsers */
+	.hero-section {
+		height: auto;
+		min-height: 100vh;
+	}
+
+	/* Disable fixed background only on mobile */
+	.hero-section > div:first-child {
+		background-attachment: scroll !important;
+	}
+
+	/* Center align content vertically */
+	.hero-section .d-flex {
+		align-items: center !important;
+	}
+}
+
+.hero-text h1 {
+	font-size: 4.2rem;
+	font-weight: 900;
+	line-height: 1.1;
+	letter-spacing: 1px;
+	text-shadow: 2px 4px 12px rgba(0, 0, 0, 0.7);
+}
+
+.hero-text p {
+	font-size: 1.2rem;
+	font-weight: 400;
+	max-width: 520px;
+	text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* 🔹 MOBILE ONLY */
+@media (max-width: 768px) {
+	.hero-text {
+		text-align: center;
+		margin: 0 auto;
+	}
+
+	.hero-text h1 {
+		font-size: 2.2rem;
+	}
+
+	.hero-text p {
+		font-size: 1rem;
+		max-width: 100%;
+	}
+}
+
+.services-section {
+	position: relative;
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	padding: 20px;
+}
+
+/* Gradient Text Effect for "Our Services" */
+.gradient-title {
+	font-size: 8rem;
+	font-weight: 700;
+	letter-spacing: -3px;
+	margin-bottom: 2rem;
+	background: linear-gradient(
+		90deg,
+		#000000 35%,
+		#e91e63 55%,
+		#00bcd4 75%,
+		#000000 100%
+	);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+
+.services-subtitle {
+	font-size: 1.1rem;
+	color: #333;
+	font-weight: 400;
+	max-width: 600px;
+}
+
+/* Floating Tilted Images */
+.floating-img {
+	position: absolute;
+	width: 150px;
+	height: 150px;
+	object-fit: cover;
+	border-radius: 8px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Positions and Tilts based on sc2.jpg */
+.img-1 {
+	top: 15%;
+	left: 8%;
+	transform: rotate(-5deg);
+	width: 120px;
+	height: 120px;
+}
+
+.img-2 {
+	bottom: 10%;
+	left: 5%;
+	transform: rotate(10deg);
+	width: 180px;
+	height: 180px;
+}
+
+.img-3 {
+	top: 20%;
+	right: 5%;
+	transform: rotate(12deg);
+	width: 160px;
+	height: 160px;
+}
+
+.img-4 {
+	bottom: 15%;
+	right: 10%;
+	transform: rotate(-8deg);
+	width: 130px;
+	height: 130px;
+}
+
+@media (max-width: 768px) {
+	.gradient-title {
+		font-size: 4rem;
+	}
+
+	.floating-img {
+		display: none;
+	}
+
+	/* Hide decorative images on small screens */
+}
