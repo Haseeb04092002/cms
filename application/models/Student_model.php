@@ -146,7 +146,7 @@ class Student_model extends CI_Model
         }
 
         if (!empty($batch_year)) {
-            $this->db->where('s.batchYear', (int)$batch_year);
+            $this->db->where('s.batchYear', $batch_year);
         }
 
         if (!empty($student_name)) {

@@ -939,4 +939,26 @@ class Student extends MY_Controller
 
         exit(json_encode($Response));
     }
+
+    public function update_batch_year() {
+        $years = [];
+        for ($i = 2010; $i <= 2030; $i++) {
+            $next_year = substr((string)($i + 1), -2);
+            $years[] = "'" . $i . "-" . $next_year . "'";
+        }
+        $enum_str = implode(',', $years);
+
+        $tables = $this->db->query("SELECT TABLE_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND COLUMN_NAME = 'batchYear'")->result();
+
+        foreach ($tables as $t) {
+            $table = $t->TABLE_NAME;
+            $sql = "ALTER TABLE $table MODIFY COLUMN batchYear ENUM($enum_str) DEFAULT NULL";
+            if ($this->db->query($sql)) {
+                echo "$table altered successfully.<br>";
+            } else {
+                echo "Error altering $table.<br>";
+            }
+        }
+        echo "Done.";
+    }
 }
