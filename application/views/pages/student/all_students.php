@@ -235,6 +235,8 @@ $StationId = $this->session->userdata('station_id') ?? '';
                                                 <li><a class="dropdown-item navigator" href="<?= site_url('Student/student_profile/') . $record->studentId . '/' . $record->admissionNo ?>">View</a></li>
                                                 <li><a class="dropdown-item navigator" href="<?= site_url('Student/student_data/') . $record->studentId . '/' . $record->admissionNo ?>">Edit</a></li>
                                                 <li><a class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#feeModal<?= $record->studentId ?>">Fee</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item text-danger btn-delete-student" href="javascript:void(0)" data-id="<?= $record->studentId ?>">Delete</a></li>
                                             </ul>
                                         </div>
 
@@ -294,7 +296,6 @@ $StationId = $this->session->userdata('station_id') ?? '';
                                                 Reports
                                             </button>
                                             <ul class="dropdown-menu">
-                                                <li><a class="dropdown-item" target="_blank" href="<?= site_url('Student/print_student_doc/character_certificate') ?>">Character Certificate</a></li>
                                                 <li><a class="dropdown-item" href="#">School Leaving Certificate</a></li>
                                                 <li><a class="dropdown-item" href="#">Fee Voucher</a></li>
                                                 <li><a class="dropdown-item" href="#">Attendance Report</a></li>
@@ -393,6 +394,12 @@ $StationId = $this->session->userdata('station_id') ?? '';
                                         Fee
                                     </button>
                                 </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger btn-delete-student" href="javascript:void(0)" data-id="<?= $record->studentId ?>">
+                                        Delete
+                                    </a>
+                                </li>
                             </ul>
                         </div>
 
@@ -404,14 +411,6 @@ $StationId = $this->session->userdata('station_id') ?? '';
                             </button>
 
                             <ul class="dropdown-menu w-100">
-                                <li>
-                                    <a class="dropdown-item"
-                                        target="_blank"
-                                        href="<?= site_url('Student/print_student_doc/character_certificate') ?>">
-                                        Character Certificate
-                                    </a>
-                                </li>
-
                                 <li><a class="dropdown-item" href="#">School Leaving Certificate</a></li>
                                 <li><a class="dropdown-item" href="#">Fee Voucher</a></li>
                                 <li><a class="dropdown-item" href="#">Attendance Report</a></li>
@@ -525,7 +524,45 @@ $StationId = $this->session->userdata('station_id') ?? '';
             });
         });
 
-
+        $(document).off('click', '.btn-delete-student').on('click', '.btn-delete-student', function(e) {
+            e.preventDefault();
+            let studentId = $(this).data('id');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to delete this student?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "<?= site_url('Student/delete_student') ?>",
+                        type: "POST",
+                        data: { studentId: studentId },
+                        dataType: "json",
+                        success: function(res) {
+                            if (res.status === true) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    res.message,
+                                    'success'
+                                ).then(() => {
+                                    $("#pageContent").load("<?= base_url('Student/all_students') ?>");
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    res.message,
+                                    'error'
+                                );
+                            }
+                        }
+                    });
+                }
+            });
+        });
 
     });
 </script>

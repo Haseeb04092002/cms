@@ -912,4 +912,31 @@ class Student extends MY_Controller
         $this->output->set_header('X-Page-Title: All Students');
         $this->load->view('pages/student/all_students', $data);
     }
+
+    public function delete_student()
+    {
+        $Response = [
+            'status' => false,
+            'message' => 'Some Error Occured. Try Again'
+        ];
+        
+        $StationId = $this->session->userdata('station_id');
+        $studentId = $this->input->post('studentId');
+        
+        if (empty($studentId)) {
+            $Response['message'] = "Invalid Request";
+            exit(json_encode($Response));
+        }
+
+        $this->db->where('studentId', $studentId);
+        $this->db->where('stationId', $StationId);
+        $this->db->update('tbl_students', ['isDeleted' => 1]);
+
+        if ($this->db->affected_rows() > 0) {
+            $Response['status'] = true;
+            $Response['message'] = "Student deleted successfully.";
+        }
+
+        exit(json_encode($Response));
+    }
 }

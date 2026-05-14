@@ -38,6 +38,8 @@
                             <li><a class="dropdown-item navigator" href="<?= site_url('Student/student_data/') . $record->studentId . '/' . $record->admissionNo ?>">Edit</a></li>
                             <li><a class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#feeModal<?= $record->studentId ?>">Fee</a></li>
                             <li><a class="dropdown-item" href="#">Promote</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger btn-delete-student" href="javascript:void(0)" data-id="<?= $record->studentId ?>">Delete</a></li>
                         </ul>
                     </div>
 
@@ -289,7 +291,6 @@
                             Reports
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" target="_blank" href="<?= site_url('Student/print_student_doc/character_certificate') ?>">Character Certificate</a></li>
                             <li><a class="dropdown-item" href="#">School Leaving Certificate</a></li>
                             <li><a class="dropdown-item" href="#">Fee Voucher</a></li>
                             <li><a class="dropdown-item" href="#">Attendance Report</a></li>
